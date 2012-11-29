@@ -4,6 +4,16 @@ a javascript selector with incredible scalability, but still very fast
 
 ## Support
 
+### 框架
+  1. NEJ
+    在[NEJ](https://github.com/NetEase/NEJ)目前是以匿名模块的方式，大家可以依赖NEJ作为种子开发lib直接使用，只要加载nej里的适配模块`{lib}util/query/query.js`,就可以直接在nej中使用选择器如:
+    ```
+      _v._$addEvent('#abc','click',function)
+    ```
+    具体适配方式请参考[NEJ](http://nej.netease.com)
+  2. amd
+  3. commonjs
+  4. 其他注册到全全局
 ### browser
   1. ie6+              
   2. 其他浏览器的最新版(即我没有测试chrome、opera的低版本，但是应该是支持的因为IE6都支持了，呵呵...)

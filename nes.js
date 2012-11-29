@@ -10,7 +10,7 @@
   // 本来想做个Wrapper类(类JQeruy)，想想还是做个纯粹的选择器吧
   // nes目前仅作为all方法的alias
   var nes = function(sl,context){return new NES(sl, context)},
-    prevNeggs = win.nes
+    prevNes = win.nes
 
   nes.version = "0.0.3"
 
@@ -1103,15 +1103,6 @@
   } else if (typeof define === 'function' && define.amd) {
     define(function() {
       return nes
-    })
-  } else if(typeof NEJ == "object" && typeof define =="function"){
-    // 支持NEJ
-    define(function(){
-      win.nes = nes 
-      nes.noConflict = function(namespace){
-        NEJ.P(namespace)._$nes = nes
-        win.nes = prevNes
-      }
     })
   }else {
     // 直接暴露到全局
