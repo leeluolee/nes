@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>网易摄影</title>
+    <meta charset="utf-8"/>
+</head>
+<body>
+
+
+<div class="m-list">
+  <div class="btnContainer f-cb">
+    <a href="#" class="btn">时间趋势</a>
+    <a href="#" class="btn">等级分析</a>
+    <a href="#" class="btn">等级段分析</a>
+    <a href="#" class="btn">关卡对比1</a>
+    <a href="#" class="btn">关卡对比2</a>
+    <a href="#" class="btn j-clk">关卡对比3</a>
+    <a href="#" class="btn">关卡对比4</a>
+    <a href="#" class="btn">关卡对比5</a>
+    <a href="#" class="btn">关卡对比6</a>
+    <a href="#" class="btn">关卡对比7</a>
+  </div>
+  <div class="btnContainer f-cb">
+    <a href="#" class="btn">时间趋势</a>
+    <a href="#" class="btn">等级分析</a>
+    <a href="#" class="btn">等级段分析</a>
+    <a href="#" class="btn">关卡对比1</a>
+    <a href="#" class="btn">关卡对比2</a>
+    <a href="#" class="btn j-clk">关卡对比3</a>
+    <a href="#" class="btn">关卡对比4</a>
+    <a href="#" class="btn">关卡对比5</a>
+    <a href="#" class="btn">关卡对比6</a>
+    <a href="#" class="btn">关卡对比7</a>
+  </div>
+  <div class="btnContainer f-cb">
+    <a href="#" class="btn">时间趋势</a>
+    <a href="#" class="btn">等级分析</a>
+    <a href="#" class="btn">等级段分析</a>
+    <a href="#" class="btn">关卡对比1</a>
+    <a href="#" class="btn">关卡对比2</a>
+    <a href="#" class="btn j-clk">关卡对比3</a>
+    <a href="#" class="btn">关卡对比4</a>
+    <a href="#" class="btn">关卡对比5</a>
+    <a href="#" class="btn">关卡对比6</a>
+    <a href="#" class="btn">关卡对比7</a>
+  </div>
+  <div class="btnContainer f-cb">
+    <a href="#" class="btn">时间趋势</a>
+    <a href="#" class="btn">等级分析</a>
+    <a href="#" class="btn">等级段分析</a>
+    <a href="#" class="btn">关卡对比1</a>
+    <a href="#" class="btn">关卡对比2</a>
+    <a href="#" class="btn j-clk">关卡对比3</a>
+    <a href="#" class="btn">关卡对比4</a>
+    <a href="#" class="btn">关卡对比5</a>
+    <a href="#" class="btn">关卡对比6</a>
+    <a href="#" class="btn">关卡对比7</a>
+  </div>
+</div>
+<!-- @DEFINE -->
+<!-- <script src="http://nej.netease.com/nej/src/define.js?pro=./"></script> -->
+<script>
+
+var str2obj = function(str){
+    var reg = /^\s*([^:]*)\s*:\s*([^:;]*);/g,tmp = {}
+    while(str = str.replace(reg, function(all, left, right){
+        tmp[left] =right
+        console.log(str,all)
+        return ""
+    })){}
+    return tmp
+}
+
+console.log(str2obj("left:82.5px;top:69.5px;cursor:w-resize;"))
+
+// var f = function(){
+//   var _v = NEJ.P("nej.v"),
+//     container = nes.one(".m-list")
+
+//   _v._$delegateEvent(container, "click -> a.btn",function(e){
+//     alert(e.target.innerHTML)
+//   })
+// }
+// define("demo.js", ["{pro}/delegate.js","{lib}ui/base.js","{pro}../nes.js"], f)
+</script>
+</body>
+</html>
