@@ -123,7 +123,7 @@
     replaceReg = /\{\{([^\}]*)\}\}/g, //替换rule中的macro
     esReg = /[-[\]{}()*+?.\\^$|,#\s]/g, //需转移字符
     nthValueReg = /^(?:(\d+)|([+-]?\d*)?n([+-]\d+)?)$/,// nth伪类的value规则
-    posPesudoReg =  /^(nth-)?[\w-]*(-of-type|-child)/ //判断需要pos
+    posPesudoReg =  /^(nth-)?[\w-]*(-of-type|-child)/, //判断需要pos
 
     // ### TRUNK
     // 所有的语法最后都会组装到这个TRUNK变成一个巨型RegExp  
@@ -132,7 +132,7 @@
     // 第一个cache 用来装载nth伪类中的参数解析后的数据
     // 如nth-child、nth-of-type等8个伪类
     nthCache = createCache(100),
-    // 提取nthValue中的有用信息 比如an + b 我们需要提取出a以及b并对额外情况如缺少a参数或b参数
+    // 提取nthValue中的有用信息 比如an + b 我们需要提取出a以及,b并对额外情况如缺少a参数或b参数
     // 或者有a、b小于0这些情况作统一处理，返回find适合使用的数据
     extractNthValue = function(param){
      var step,start,res
@@ -372,7 +372,7 @@
         curIndex = setupOneRule(rules[i], i,splits, curIndex)
       }
     }
-    TRUNK = new RegExp("("+splits.join(")|(")+")","g")
+    TRUNK = new RegExp("^(?:("+splits.join(")|(")+"))")
     cleanReg = cleanReg = new RegExp("\\s*(,|" + macros.combo + "|" + macros.operator + ")\\s*","g")
   }
 
@@ -388,6 +388,7 @@
     // --------------------------
     // 1. 根据symbol link 散布参数
     process = function(){
+
       var parsed = this,
         args = slice.call(arguments),
         ruleName, link, rule, index
@@ -396,18 +397,17 @@
           ruleName = link[0]
           retain =link[1]
           index = parseInt(i) 
-          if(args[i]){
-          }
           if(args[i] && (rule = rules[ruleName])){
             rule.action.apply(this,args.slice(index,index+retain))
           }
         }
+      return ""
     },
     parseCache = createCache(200)
 
   var parse = function(sl){
     
-    var selector = clean(sl),parsed
+    var selector = remain = clean(sl),parsed
     if(parsed = parseCache.get(selector)) return parsed
 
     var parsed = {},
@@ -415,21 +415,16 @@
       part
 
     parsed.error = function(msg){
-      throw Error("选择符\"" + selector + "\"在(pos:" +
-        (parsed.index + parsed.lastMatch.length) + "):" + (msg||"Parse Error"))
+      throw Error("选择符\"" + sl + "含有味识别的选择器:Syntax Error")
     }
     parsed.current = function(){
       var piece = data[data.length-1],
         len = piece.length
       return piece[len-1] || (piece[len-1] = {tag:"*"})
     }
-    while(part = TRUNK.exec(selector)){
-      if(parsed.lastMatch&&parsed.lastMatch.length+parsed.index !== part.index) parsed.error("Syntax Error——有未识别语法")
-      parsed.index = part.index
-      parsed.lastMatch = part[0]
-      process.apply(parsed,part)
+    while(remain != (remain = remain.replace(TRUNK,process.bind(parsed)))){
     }
-    if(parsed.lastMatch&&parsed.lastMatch.length+parsed.index !== selector.length) parsed.error("Syntax Error——有未识别语法")
+    if(remain !== "") parsed.error()
     return parseCache.set(selector, parsed)
   }
   
