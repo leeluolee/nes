@@ -1,0 +1,34 @@
+p:not(.example:nth-child(even)) a:first-child ,div.example[class] p:nth-of-type(2n) a:last-of-type, p:nth-of-type(3n-11) a:last-child
+div ~ p ~ p ~ p a
+.title ,.toc, .toc .tocline2
+div ~ p + p ~ p a:first-child
+div ~ p ~ p + p[class]
+body div p a
+p:nth-child(even)
+p:nth-child(2n)
+p:nth-last-child(odd)
+p:nth-child(5n+1)
+p:nth-child(-3n+11)
+p:nth-child(3n-11)
+p:nth-of-type(5n+1), p:nth-of-type(3n-11)
+div.example[class] p:nth-child(2n):not(.toc2,.toc) span
+body p:first-child a[href],body div.example
+h1#title, div h1:matches(#title)
+div.example, ul .tocline2
+.tocline2, .tocline3, .tocline4
+div.example[class] ~ p.note > strong + code.css, p.note ~ h4
+body div, div p
+div > p, div + p, div ~ p
+div[class^=exa][class$=mple]
+div p a
+div > p > a
+div.example > p > a
+div + p + a
+div ~ p ~ p ,div[class$=mple]
+div, p ,div[class~=example][class][class~=example]
+ul.toc li.tocline2, div[class=example]
+ul.toc > li.tocline2, div[class]
+a[href][lang][class]
+div[class^=exa]
+div[class*=e]
+div:not(.example), p:contains(selectors)
