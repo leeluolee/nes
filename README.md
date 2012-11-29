@@ -90,7 +90,7 @@ __注意2__:所有的扩展都可以传入一个Object, 来实现一次扩展多
 __场景描述__:你需要获取所有的ul元素,这个元素中包含有满足(li.trigger a[href])的a标签
 
 __原始做法__:
-```
+```javascript
 var lists = document.querySelectorAll("ul")
 for(var i = lists.length; i--;){
     var list = lists[i]
@@ -103,7 +103,7 @@ return lists
 __理想做法__: `nes.all('ul:include(li.trigger a[href])')`
 
 __你需要做的扩展是__:
-```
+```javascript
 // 其中node表示当前遍历到的节点, param代表pesudo的参数如本例的`li.trigger a[href]`
 nes.pesudos("include", function(node, param){
   return !!nes.one( param, node) // 返回bool值证明这个节点是否
@@ -116,7 +116,7 @@ __场景描述__: 坑爹啊，标准selector竟然不提供__不等于__操作�
 __理想做法__: `nes.all('div[class!=made_up]')`
 
 __你需要做的扩展是__:
-```
+```javascript
 // 与伪类扩展一样 ,第一个参数表示当前遍历到的节点，你要决定它是否通过
 // key 代表属性名(如本例的class)、value代表属性值(如本里的made_up)
 nes.operators("!=", function(node, key, value){
@@ -134,7 +134,7 @@ __原生方法__: &$*@&*$&@(*$(*!)!)##!&$*^!@#$%^&*(*&^%$#@#$%^&*()(%$!@#$% (真
 __理想做法__: `nes.all ('ul.test1 li.trigger & li')`
 
 __你需要做的扩展是__:
-```
+```javascript
 // 这里直接一起扩展了~、+的相反版
 nes.combos({
   // 相当于 ~ 的相反版 , match是一个动态产生的方法，它代表这个节点，是否满足选择器条件，
@@ -178,7 +178,7 @@ __原生方法__: `ul.test1 > li:nth-child(n+1):not(:nth-last-child(n+10))`
 __理想做法__: `ul.test1 > li{1,9}`  ===> __此语法没有定义会报解析错误__
 
 __你需要做的扩展是__:
-```
+```javascript
 // 在进行语法扩展时reg是必须的，
 // action与filter至少需要需要二选其一(根据场景不同)才能完成一个自定义规则的实施, 否则虽然不会报错
 // 但是只是匹配了，让解析器不报错，但是这个选择器什么都不会做
@@ -221,7 +221,7 @@ __注意__:扩展的语法的正则式要描述清楚，否则可能会覆盖内
 __警告__: 可能会立刻被移除, 因为这不是一个纯洁的选择器该做的事
 
 __API__:
-```
+```javascript
 nes(sl).one(sl2) == nes.all(sl2, nes.all(sl))
 
 nes(sl).all(sl2） == nes.all(sl2, nes.all(sl))
