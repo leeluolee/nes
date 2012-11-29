@@ -45,12 +45,14 @@ a javascript selector with incredible scalability, but still very fast
 
 1. `nes.one(String selector,Element context)`: 返回第一个匹配selector(在context的subtree中)的元素
 
-2. `nes.all(String selector,Element context)`: 返回所有匹配匹配selector(在context的subtree中)的元素,如a  :
+2. `nes.all(String selector,Element context)`: 返回所有匹配匹配selector(在context的subtree中)的元素,如a
+
 ```javascript
 nes.one("tr:nth-child(even) > td:nth-child(odd)",someTable) //-> 取得someTable下的所有偶数列中奇数行
 ```
 
 3. `nes.matches(Element node,String selector)`(selector API level 2): 返回node是否匹配selector这个选择器。如利用事件代理时，你不需要再去调用标准dom方法去测试节点是否满足某种条件，直接使用matches进行判断, 如:
+
 ```
 container.addEventListener("click", function(e){
         if(nes.matches(e.target, ".signup a.top")){//直接利用选择器判断是否是注册表单下的置顶按钮
@@ -68,18 +70,19 @@ __一般开发人员看到这里就可以结束__, 需要有更深入了解和�
 
 1. `nes.parse`: 解析选择器(字符串)使其可以方便的被find使用, `nes.all`依赖方法
   比如 `div.example[class] p:nth-child(2n)，p.content ~ span` 返回的data是:
-  ```javascript
+
+```javascript
+[
   [
-    [
-      {"tag":"div","classList":["example"],"attributes":[{"key":"class"}],"combo":" "}
-      {"tag":"p","pesudos":[{"name":"nth-child","param":{"start":2,"step":2}}]}
-    ],
-    [
-      {"tag":"p","classList":["content"],"combo":"~"},
-      {"tag":"span"}
-    ]
+    {"tag":"div","classList":["example"],"attributes":[{"key":"class"}],"combo":" "}
+    {"tag":"p","pesudos":[{"name":"nth-child","param":{"start":2,"step":2}}]}
+  ],
+  [
+    {"tag":"p","classList":["content"],"combo":"~"},
+    {"tag":"span"}
   ]
-  ```
+]
+```
 2. `nes.find`: 从parse传入的parseData进行节点查找,`nes.all`依赖方法
 
 3. `nes._get`: 相当于`nes.all`, 即不去调用原生querySelector直接用nes查找(纯测试用)
