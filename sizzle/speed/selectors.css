@@ -1,4 +1,5 @@
-p:not(.example:nth-child(even)) a:first-child ,div.example[class] p:nth-of-type(2n) a:last-of-type, p:nth-of-type(3n-11) a:last-child
+p:not(.example:nth-child(even)) a:first-child
+div.example[class] p:nth-of-type(2n) a:last-of-type, p:nth-of-type(3n-11) a:last-child
 div ~ p ~ p ~ p a
 .title ,.toc, .toc .tocline2
 div ~ p + p ~ p a:first-child
@@ -31,4 +32,4 @@ ul.toc > li.tocline2, div[class]
 a[href][lang][class]
 div[class^=exa]
 div[class*=e]
-div:not(.example), p:contains(selectors)
+div:not(.example)
