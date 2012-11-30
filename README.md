@@ -23,13 +23,13 @@ a javascript selector with incredible scalability, but still very fast
   1. id、tagName、星号、className、所有操作符(=、|=、~=、^=、$=、*=) 、
   2. 主要是伪类<br/>
       "not", "matches", "nth-child", "nth-last-child", "nth-of-type", "nth-last-of-type",
-      "first-child", "last-child", "last-of-type", "first-of-type", "root", "only-child", "only-of-type",
+      "first-child", "last-child", "last-of-type", "first-of-type",  "only-child", "only-of-type",
       "checked", "enabled", "disabled", "empty", "focus", "target"
   3. 所有连接符(>、~等)、分隔符(,)完整支持
   4. 在此之上的选择器序列的任意组合
   5. 另外, 在 test/ 目录有很多选择器扩展像 :include、:contains、 != operator... 并且你可以参考学会如何扩展nes
 
-  _具体语法请参考css selector level 4的说明_——简而言之，除了部分伪类、全部伪元素没有支持外，其余都支持
+  _具体语法请参考css selector level 4的说明_——简而言之，除了部分伪类、全部伪元素没有支持外，其余都支持(其实更多选择器的支持不难如果JS是可以实现的话，关键是整个流程的逻辑不要错)
 
 
 ### speed

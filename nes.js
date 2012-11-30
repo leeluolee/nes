@@ -13,7 +13,6 @@
     prevNes = win.nes
 
   nes.version = "0.0.3"
-
   var 
     // 常用属性local化
     ap = Array.prototype,
@@ -22,7 +21,7 @@
     fp = Function.prototype,
     slice = ap.slice,
     body = doc.body,
-
+    testNode = doc.createElement("div"),
     // ###Helper(助手函数)
 
     // 够用的短小类型判断 
@@ -123,7 +122,7 @@
     replaceReg = /\{\{([^\}]*)\}\}/g, //替换rule中的macro
     esReg = /[-[\]{}()*+?.\\^$|,#\s]/g, //需转移字符
     nthValueReg = /^(?:(\d+)|([+-]?\d*)?n([+-]\d+)?)$/,// nth伪类的value规则
-    posPesudoReg =  /^(nth-)?[\w-]*(-of-type|-child)/, //判断需要pos
+    posPesudoReg =  /^(nth)[\w-]*(-of-type|-child)/, //判断需要pos
 
     // ### TRUNK
     // 所有的语法最后都会组装到这个TRUNK变成一个巨型RegExp  
@@ -156,13 +155,17 @@
           step = 0
           start = parseInt(res[1])
         }else{
+          if(res[2] == "-") res[2] ="-1"
           step = res[2]? parseInt(res[2]) :1
           start = res[3]? parseInt(res[3]):0
         }
       }
       if(start<1){
-        if(step <1) throw Error("an+b中的a，b不能同时都小于1")
-        start = -(-start)%step +step
+        if(step <1){
+          step = null //标志false
+        }else{
+          start = -(-start)%step +step
+        }
       } 
       return nthCache.set(param,{start:start,step:step})
     }
@@ -290,7 +293,6 @@
     if(left !== right) throw regStr+"中的括号不匹配"
     else return left - ignored
   }
-
   //这里替换掉Rule中的macro
   var cleanRule = function(rule){
     var reg = rule.reg
@@ -449,7 +451,7 @@
       }
     },
   
-    nthChild = function(node, n, type){
+    nthChild = nes.nthChild =function(node, n, type){
       var node = node.firstChild
       if(!node) return 
       if(type){
@@ -459,7 +461,7 @@
       }
       return nthNext(node,n, type)
     },
-    nthLastChild = function(node, n, type){
+    nthLastChild = nes.nthLastChild =  function(node, n, type){
       var node = node.lastChild
       if(!node) return 
       if(type){
@@ -469,7 +471,7 @@
       }
       return nthPrev(node, n, type)
     },
-    nthPrev = function(node, n, type){
+    nthPrev = nes.nthPrev = function(node, n, type){
       while(n && (node = node.previousSibling)){
         if(type){
           if(node.nodeName === type) n--
@@ -480,7 +482,7 @@
       return node
     },
     // 向后查找n个节点元素
-    nthNext = function(node, n, type){
+    nthNext = nes.nthNext =  function(node, n, type){
       while(n && (node = node.nextSibling)){
         if(type){
           if(node.nodeName === type) n--
@@ -490,7 +492,7 @@
       }
       return node
     },
-    hasAttribute = body.hasAttribute? function(node,key){
+    hasAttribute = testNode.hasAttribute? function(node,key){
       return node.hasAttribute(key)
     }:function(node,key){
       if (attrMap[key]) {
@@ -568,6 +570,8 @@
           step = param.step,
           start = param.start ,
           type = isType && node.nodeName
+        //Fixed
+        if(step === null) return false  //means always false
         if(!cache[_uid] && nes.usePositionCache){
           cache.used = 1
           var startNode = getStart(parent,1, type),index = 0
@@ -575,14 +579,14 @@
             cache[getUid(startNode)] = ++index
           }while(startNode = next(startNode, 1, type))
         }
-
         var position = cache[_uid]
+        if(step ===0) return position === start
         if((position - start)/step >= 0 && (position - start)%step == 0){
           return true
         }
       }
     },
-    nthPositionCache = {used:1}
+    nthPositionCache = {used:1},
     clearNthPositionCache = function(){
       if(nthPositionCache.used){
         nthPositionCache = {
@@ -748,21 +752,22 @@
         "nth-of-type":createNthFilter(1,1),
         "nth-last-of-type":createNthFilter(0,1),
         "first-child":function(node){
-          return nthChild(node.parentNode,1) === node
+          return !nthPrev(node,1)
         },
         "last-child":function(node){
-          return nthLastChild(node.parentNode,1) === node
+          return !nthNext(node,1)
         },
         "last-of-type":function(node){
-          return nthLastChild(node.parentNode,1,node.nodeName) === node
+          return !nthNext(node,1,node.nodeName)
         },
         "first-of-type":function(node){
-          return nthChild(node.parentNode,1,node.nodeName) === node
+          return !nthPrev(node,1,node.nodeName)
         },
         "root":function(node,param){
-          return node === root
+          return root === node;
         },
         "only-child":function(node){
+          
           return !nthPrev(node,1) && !nthNext(node,1)
         },
         "only-of-type":function(node){
@@ -778,10 +783,18 @@
           return node.disabled === true
         },
         "empty":function(node){
-          return node.innerHTML === ""
+          var nodeType;
+          node = node.firstChild;
+          while ( node ) {
+            if ( node.nodeName > "@" || (nodeType = node.nodeType) === 3 || nodeType === 4 ) {
+              return false;
+            }
+            node = node.nextSibling;
+          }
+          return true;
         },
         "focus":function(node){
-          return doc.activeElement === node
+          return node === doc.activeElement && (!doc.hasFocus || doc.hasFocus()) && !!(node.type || node.href || ~node.tabIndex);
         },
         "selected":function(node){
           return node.selected
@@ -825,7 +838,7 @@
     //动态产生供FilterOneNode使用的match
     createMatch = function(data){
       return function(node){
-        if(node == doc|| node == null) return null //null 相当于休止符
+        if(node == root|| node == null) return null //null 相当于休止符
         return matchData(node, data)
       }
     },
@@ -941,7 +954,7 @@
     if(!matchDatum(node, data[len-1])){
       return false
     }else{
-      return filter([node], data).length ===1
+      return filter([node],data.slice(0,-1)).length ===1
     }
   }
   // API 5: selector api 2 matches (public)
@@ -1107,6 +1120,7 @@
       win.nes = prevNes
     }
   }
+
 }(window,document)
   // TODO: 内容
   // 1. 重构 √
@@ -1122,4 +1136,7 @@
   // 12.将combo的优先级降到最低 (因为单字符更容易被匹配到) X 暂时不做
   // 13.完成nth的优化
   // 14. 做好find的demo 、做好Wrapper类 构思好如何扩展
+  // 
+  // 
+// HAHAHA
 
