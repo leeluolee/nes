@@ -1,6 +1,6 @@
 var sls = [
 "p:not(.example:nth-child(even)) a:first-child",
-"p:matches(.example:nth-child(even)) a:first-child"
+"p:matches(.example:nth-child(even)) a:first-child",
 "p + p ~ p>a:first-child",
 "div.中文",
 "a:first-child",

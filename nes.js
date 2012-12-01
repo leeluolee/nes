@@ -191,7 +191,7 @@
     // 一些macro
     macros = {
       split:"\\s*,\\s*", // 分隔符
-      operator: "[*^$|~]?=", // 属性操作符 如= 、!=
+      operator: "[*^$|~!]?=", // 属性操作符 如= 、!=
       combo: "[>\\s+~](?!=)", // 连接符 如 > ~ 
       // 中文unicode范围http://baike.baidu.com/view/40801.htm#sub40801_3
       word: "[\\w\\u4e00-\\u9fbf-]"
@@ -735,7 +735,10 @@
           return ~("-"+realValue+"-").indexOf("-"+value+"-")
         },
         "*=":function(node,key,value){
-          return ~(getAttribute(node,key)||" ").indexOf(value)
+          return ~(getAttribute(node,key) || " ").indexOf(value)
+        },
+        "!=":function(node,key,value){
+          return getAttribute(node, key) !== value
         }
       },
       pesudos: {
@@ -751,30 +754,42 @@
         "nth-last-child":createNthFilter(0,0),
         "nth-of-type":createNthFilter(1,1),
         "nth-last-of-type":createNthFilter(0,1),
+        "nth-match":function(node,param){
+          var 
+            tmp = param.split(/\s+of\s+/),
+            nth = parseInt(tmp[0]),
+            sl = tmp[1],
+            start = node.parentNode.firstChild
+
+          do{
+            if(start.nodeType === 1 && nes.matches(start , sl)) nth--
+          }while(nth&&(start = start.nextSibling))
+
+          return !nth && node === start 
+        },
         "first-child":function(node){
-          return !nthPrev(node,1)
+          return !nthPrev(node, 1)
         },
         "last-child":function(node){
-          return !nthNext(node,1)
+          return !nthNext(node, 1)
         },
         "last-of-type":function(node){
-          return !nthNext(node,1,node.nodeName)
+          return !nthNext(node, 1, node.nodeName)
         },
         "first-of-type":function(node){
-          return !nthPrev(node,1,node.nodeName)
-        },
-        "root":function(node,param){
-          return root === node;
+          return !nthPrev(node, 1, node.nodeName)
         },
         "only-child":function(node){
-          
           return !nthPrev(node,1) && !nthNext(node,1)
         },
         "only-of-type":function(node){
-          return !nthPrev(node,1,node.nodeName) && !nthNext(node,1,node.nodeName)
+          return !nthPrev(node, 1, node.nodeName) && !nthNext(node, 1, node.nodeName)
         },
         "checked":function(node){
-          return node.checked === true
+          return !!node.checked || !!node.selected
+        },
+        "selected":function(node){
+          return node.selected
         },
         "enabled":function(node){
           return node.disabled === false 
@@ -795,9 +810,6 @@
         },
         "focus":function(node){
           return node === doc.activeElement && (!doc.hasFocus || doc.hasFocus()) && !!(node.type || node.href || ~node.tabIndex);
-        },
-        "selected":function(node){
-          return node.selected
         },
         "target":function(node,param){
           var id = node.id || node.name
@@ -827,7 +839,6 @@
         var
           nextDatum = data[len-2],
           getNext = expandFilters.combos[nextDatum.combo],
-          nextData = data.slice(0,-1),
           match = matchesCache[len-2],
           next = getNext(node,match)
 
