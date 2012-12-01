@@ -5,8 +5,7 @@ a javascript selector with incredible scalability, but still very fast
 ## Support
 
 ### 框架
-  1. NEJ
-    在[NEJ](https://github.com/NetEase/NEJ)目前是以匿名模块的方式，只要加载nej里的选择器适配模块`{lib}util/query/query.js`,就可以直接在nej中使用选择器如:
+  1. nes在[NEJ](https://github.com/NetEase/NEJ)目前是以匿名模块的方式，只要加载nej里的选择器适配模块`{lib}util/query/query.js`,就可以直接在nej中使用选择器如:
     ```
       _v._$addEvent('#abc','click',function)
     ```
@@ -16,27 +15,22 @@ a javascript selector with incredible scalability, but still very fast
   4. 其他注册到全全局
 
 ### browser
+
   1. ie6+              
-  2. 其他浏览器的最新版(即我没有测试chrome、opera的低版本，但是应该是支持的因为IE6都支持了，呵呵...)
+  2. 其他浏览器的最新版,即我没有测试chrome、opera的低版本
 
 ### selector
-  1. id、tagName、星号、className、所有操作符(=、|=、~=、^=、$=、*=) 、
-  2. 主要是伪类<br/>
-      "not", "matches", "nth-child", "nth-last-child", "nth-of-type", "nth-last-of-type",
-      "first-child", "last-child", "last-of-type", "first-of-type",  "only-child", "only-of-type",
-      "checked", "enabled", "disabled", "empty", "focus", "target"
-  3. 所有连接符(>、~等)、分隔符(,)完整支持
-  4. 在此之上的选择器序列的任意组合
-  5. 另外, 在 test/ 目录有很多选择器扩展像 :include、:contains、 != operator... 并且你可以参考学会如何扩展nes
 
-  _具体语法请参考css selector level 4的说明_——简而言之，除了部分伪类、全部伪元素没有支持外，其余都支持(其实更多选择器的支持不难如果JS是可以实现的话，关键是整个流程的逻辑不要错)
+移步[Wiki页](https://github.com/leeluolee/nes/wiki/Selector) 简而言之，除了部分伪类、全部伪元素没有支持外，其余都支持(其实更多选择器的支持不难如果JS是可以实现的话，关键是整个流程的逻辑不要错)
 
+### 速度测试
 
-### speed
-  1. 剽窃了sizzle的速度测试用例，直接在sizzle目录的speed里运行,貌似不能本地运行。推荐使用[puer](https://github.com/leeluolee/puer)工具可以帮助你在当前路径下建立一个自动刷新的静态服务器。速度被querySelectorAll秒杀，但是秒杀sizzle。
-  2. 由于这个测试用例貌似不支持ie，所以你也可以再test目录下运行test.html检查它在IE下的兼容性，由于暂时单人测试、难免有违覆盖的地方，也希望大家能提供测试BUG
+  1. 剽窃了sizzle的速度测试用例，直接在sizzle目录的speed里运行,貌似不能本地运行。推荐使用[puer](https://github.com/leeluolee/puer)工具可以帮助你在当前路径下建立一个自动刷新的静态服务器。速度被querySelectorAll秒杀，但是秒杀sizzle(当然Sizzle的关键是它的稳定性)。
+
+  2. 由于这个测试用例貌似不支持ie，所以你也可以再test目录下运行test.html检查它在IE下的兼容性，由于出来仓促、难免有违覆盖的地方，也希望大家能提供测试BUG
 
 ## API
+
 这里你可以慢慢看到nes的真正的特别之处，不仅仅是__速度__，我从来不以为做一个最快的选择器为目标，或许一次简单的缓动动画对UI的影响就超过了你使用几千次选择器,不要牺牲了代码和接口的质量换取一点点速度评分上的提升。nes源码中除了一两个主函数刚刚超过20行，其余代码都在15行以内, 一点点速度降低换来了优秀的接口和可维护性高的源码
 
 ### 标准API
