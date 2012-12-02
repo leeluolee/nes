@@ -42,14 +42,24 @@
         }
       })(i);
     }
+    try{
+
+
   _addStyle("\
     body,ul{padding: 0; margin: 0; }\
     .m-log {list-style: none;padding: 0;color: #666;}\
     .m-log li{position:relative; padding-left:22px;font-size:16px;  line-height: 32px;font-weight: bold;border-bottom: 1px solid #ccc;box-shadow: 0px 1px 1px #ccc;background: #eee;}\
     .m-log li:before {position: absolute; font-size: 16px; font-weight: bold; left: 1px; }\
     .m-log .log:before {content: '√ '; color: #468847; }\
+    .m-log .log{color:#468847}\
     .m-log .error:before{content: '\\0000D7 '; color: #b94a48;}\
-    .m-log .info:before{content: 'i '; color: #F89406; left: 5px}")
+    .m-log .error{color: #b94a48;}\
+    .m-log .info:before{content: 'i '; color: #F89406; left: 5px}\
+    .m-log .info{color: #F89406}"
+    )
+}catch(e){
+  
+}
 
 })()
 

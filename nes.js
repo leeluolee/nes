@@ -150,14 +150,16 @@
       }else{
         res = param.match(nthValueReg)
         // 对错误的nth参数抛出错误
-        if(!res) throw Error("错误的nth-child格式"+param)
-        if(res[1]){
-          step = 0
-          start = parseInt(res[1])
-        }else{
-          if(res[2] == "-") res[2] ="-1"
-          step = res[2]? parseInt(res[2]) :1
-          start = res[3]? parseInt(res[3]):0
+        if(!res) step = null  // 无论其他参数，如果step为null，则永远为false
+        else{
+          if(res[1]){
+            step = 0
+            start = parseInt(res[1])
+          }else{
+            if(res[2] == "-") res[2] ="-1"
+            step = res[2]? parseInt(res[2]) :1
+            start = res[3]? parseInt(res[3]):0
+          }
         }
       }
       if(start<1){
@@ -550,6 +552,10 @@
         return node._uid || (node._uid = token + _uid++)
       }
     })("nes_"+(+new Date).toString(36)),
+    // 创建nth相关的Filter，由于都类似，就统一通过工厂函数生成了
+    // 参数有两个  
+    //    1. isNext: 代表遍历顺序是向前还是向后
+    //    2. isType: 代表是否是要制定nodeName
     createNthFilter = function(isNext, isType){
       var next, prev, cache, getStart
       if(isNext){
@@ -601,6 +607,8 @@
     clearNthPositionCache()
 
   var 
+    // 这里的几个finders是第一轮获取目标节点集的依赖方法
+    // 我没有对byClassName做细致优化，比如用XPath的方式
     finders = {
       byId:function(id){
         var node = doc.getElementById(id)
@@ -615,7 +623,10 @@
         return toArray(results)
       }
     },
-    // filters 这里简化到过滤单个节点 逻辑清晰 性能可能有所损失
+    // ### filter: 
+    // Action中塞入的数据会统一先这里处理，可能是直接处理如id、class等简单的.
+    // 也可能是分发处理，甚至是多重的分发，如那些复杂的attribute或者是pesudo
+    // 这里简化到过滤单个节点 逻辑清晰 ,但可能性能会降低，因为有些属性会重复获取
     filters = {
       id:function(node,id){
         return node.id === id
@@ -635,6 +646,7 @@
         if(tag == "*") return true
         return node.tagName.toLowerCase() === tag
       },
+      // pesudos会分发到ExpandsFilter中pesudo中去处理
       pesudos:function(node, pesudos){
         var len = pesudos.length,
           pesudoFilters = expandFilters["pesudos"]
@@ -643,11 +655,13 @@
           var pesudo = pesudos[len],
             name = pesudo.name,
             filter = pesudoFilters[name]
+
           if(!filter) throw Error("不支持的伪类:"+name)
           if(!filter(node, pesudo.param)) return false
         }
         return true
       },
+      // attributes会分发到ExpandsFilter中的operator去处理
       attributes:function(node, attributes){
         var len = attributes.length,
           operatorFilters = expandFilters["operators"]
@@ -669,16 +683,16 @@
         return true
       }
     },
+
     // expandFilters 
     // -------------------------
     // 原生可扩展的方法
     expandFilters = {
-      combos: {
-        // 这里是神级扩展, 带来了良好的接口，但是对性能略有影响
-        // ----------------------------
+        // __扩展连接符__:
         // 选择符filter 与其他filter不同 node 同样是当前节点 区别是
         // 如果成功返回成功的上游节点(可能是父节点 可能是兄弟节点等等)
         // 其中 match(node) 返回 这个上游节点是否匹配剩余选择符(内部仍是一个递归)
+      combos: {
         ">": function(node,match){
           var parent = node.parentNode
           if(match(parent)) return parent
@@ -705,6 +719,7 @@
           if(prev && match(prev)) return prev
         }
       },
+      // __扩展操作符__ :
       operators: {
         "^=":function(node, key , value){
           var nodeValue = getAttribute(node, key)
@@ -741,6 +756,7 @@
           return getAttribute(node, key) !== value
         }
       },
+      // __扩展伪类__:
       pesudos: {
         //TODO:这里如果出自 SELECtorAPI 标注下处处
         "not":function(node, sl){
@@ -828,6 +844,8 @@
       }
       return true
     },
+    // 这个全局cache的引入是为了避免多次传入参数。
+    // 当然全局的缺点也很明显，维护会不方便, 不利于测试
     matchesCache = null,//保存那些matches函数
     matchData = function(node, data ,ignored){ // 稍后再看存入step
       var len = data.length,
@@ -877,6 +895,7 @@
       matchesCache = preMatchesCache  // warning :以后写全局变量一定当心
       return results
     },
+    // 获得第一次目标节点集
     getTargets = function(data, context){
       var results,ignored ,lastPiece = data[data.length-1]
       if(lastPiece.id){ 
