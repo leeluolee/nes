@@ -1000,14 +1000,58 @@
     }
     return false
   } 
+  
 
-
+  //      Creator 开始
+  // ----------------------
+  var createNode = function(option){
+    var tag = option.tag,
+      node = doc.createElement(tag == "*"? "div":option.tag),
+      creater
+    for(var i in option){
+      if(creater = ExpandCreater[i]){
+        creater(node, option[i])
+      }
+    }
+    return node
+  }
+  var ExpandCreater = {
+    id:function(node, id){
+      node.id = id
+    },
+    classList: function(node, classList){
+      node.className = classList.join(" ")
+    },
+    attributes:function(node, attributes){
+      var len = attributes.length, attribute
+      for(;len--;){
+        attribute = attributes[len]
+        node.setAttribute(attribute.key, typeof attribute.value == "undefined"? true : attribute.value)
+      }
+    }
+  }
+  // API 6: 按Simple Selector生成dom节点
+  // __注意只支持单节点__ :即
+  // 如:nes.create("p#id.class1.class2")
+  var create = function(sl){
+    var data = parse(sl).data[0],
+      len = data.length,
+      datum, parent, current, prev
+    for(var i = 0; i < len; i++){
+      datum = data[i]
+      if(i !== len-1 && datum.combo !== ">") throw Error("节点创建不能传入非>连接符")
+      prev = current
+      current = createNode(datum)
+      if(!parent){ parent = current}
+      if(prev) prev.appendChild(current)
+    }
+    return parent
+  }
   
   // ASSEMBLE
   // ----------------
 
   setup()                     // 动态组装parser
-
   // 生成pesudo 、 operator、combo 等expand方法
   // ----------------------------------------------------------------------
   ;(function createExpand(host,beforeAssign){
@@ -1118,6 +1162,7 @@
     one:one,
     all:all,
     matches:matches,
+    create:create,
     not: function(node, sl){return !matches(node,sl)},
     // 内建扩展 api
 
