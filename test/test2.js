@@ -18,6 +18,10 @@ var sls = [
 "tr ~ tr",
 "div ~ div",
 "a ~ a",
+"td + td",
+"tr + tr",
+"div + div",
+"a + a",
 ":first-child ~ :last-child",
 "div > table",
 "div  table",
@@ -34,7 +38,9 @@ var sls = [
 ":target",
 ":first-child",
 ":last-child",
-":only-child"
+":only-child",
+":nth-match(3 of a)",
+"a:nth-child(3)"
 ]
 
 

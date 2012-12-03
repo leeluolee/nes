@@ -743,7 +743,7 @@
         },
         "$=":function(node, key, value){
           var realValue = getAttribute(node, key)
-          return typeof realValue == "string" && realValue.lastIndexOf(value)+value.length == realValue.length
+          return value && typeof realValue == "string" && realValue.substr(realValue.length - value.length) === value
         },
         "|=":function(node, key, value){
           var realValue = getAttribute(node,key)||""
