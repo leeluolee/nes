@@ -37,17 +37,17 @@ a javascript selector with incredible scalability, but still very fast
 
 ### 2.1 标准API
 
-标准API有五个:(1)one、(2)all、(3)matches、(4)create。前三个分别对应[JS selector level 2](http://www.w3.org/TR/selectors-api2/#SELECTORS4)的querySelector、querySelectorAll与matches(其中matches大部分的现代浏览器都还不支持). 第四个用来通过选择器生成dom节点
+标准API有4个:(1)one、(2)all、(3)matches、(4)create。前三个分别对应[JS selector level 2](http://www.w3.org/TR/selectors-api2/#SELECTORS4)的querySelector、querySelectorAll与matches(其中matches大部分的现代浏览器都还不支持). 第四个用来通过选择器生成dom节点
 
-*. `nes.one(String selector,Element context)`: 返回第一个匹配selector(在context的subtree中)的元素
+* `nes.one(String selector,Element context)`: 返回第一个匹配selector(在context的subtree中)的元素
 
-*. `nes.all(String selector,Element context)`: 返回所有匹配匹配selector(在context的subtree中)的元素,如a
+* `nes.all(String selector,Element context)`: 返回所有匹配匹配selector(在context的subtree中)的元素,如a
 
 ```javascript
 nes.one("tr:nth-child(even) > td:nth-child(odd)",someTable) //-> 取得someTable下的所有偶数列中奇数行
 ```
 
-*. `nes.matches(Element node,String selector)`(selector API level 2): 返回node是否匹配selector这个选择器。如利用事件代理时，你不需要再去调用标准dom方法去测试节点是否满足某种条件，直接使用matches进行判断, 如:
+* `nes.matches(Element node,String selector)`(selector API level 2): 返回node是否匹配selector这个选择器。如利用事件代理时，你不需要再去调用标准dom方法去测试节点是否满足某种条件，直接使用matches进行判断, 如:
 
 ```
 container.addEventListener("click", function(e){
@@ -58,7 +58,7 @@ container.addEventListener("click", function(e){
 },false)
 ```
 
-*. `nes.create(String selector)`(同mootools的new Element):通过选择器生成简单节点，如`nes.create(ul#id.class1.class2>li.item>a[alt=haah])`输出:
+* `nes.create(String selector)`(同mootools的new Element):通过选择器生成简单节点，如`nes.create(ul#id.class1.class2>li.item>a[alt=haah])`输出:
 
 ```html
 <ul id="id" class="class1 class2">
