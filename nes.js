@@ -453,7 +453,7 @@
       }
     },
   
-    nthChild = nes.nthChild =function(node, n, type){
+    nthChild = function(node, n, type){
       var node = node.firstChild
       if(!node) return 
       if(type){
@@ -463,7 +463,7 @@
       }
       return nthNext(node,n, type)
     },
-    nthLastChild = nes.nthLastChild =  function(node, n, type){
+    nthLastChild =  function(node, n, type){
       var node = node.lastChild
       if(!node) return 
       if(type){
@@ -473,7 +473,7 @@
       }
       return nthPrev(node, n, type)
     },
-    nthPrev = nes.nthPrev = function(node, n, type){
+    nthPrev = function(node, n, type){
       while(n && (node = node.previousSibling)){
         if(type){
           if(node.nodeName === type) n--
@@ -484,7 +484,7 @@
       return node
     },
     // 向后查找n个节点元素
-    nthNext = nes.nthNext =  function(node, n, type){
+    nthNext =  function(node, n, type){
       while(n && (node = node.nextSibling)){
         if(type){
           if(node.nodeName === type) n--
@@ -569,6 +569,8 @@
         next = nthPrev
         getStart = nthLastChild
       }
+
+      
       return function (node, param){
         var _uid = getUid(node),
           parent = node.parentNode,
@@ -579,10 +581,10 @@
         //Fixed
         if(step === null) return false  //means always false
         if(!cache[_uid] && nes.usePositionCache){
-          cache.used = 1
           var startNode = getStart(parent,1, type),index = 0
           do{
             cache[getUid(startNode)] = ++index
+            nthPositionCache.length++
           }while(startNode = next(startNode, 1, type))
         }
         var position = cache[_uid]
@@ -592,9 +594,8 @@
         }
       }
     },
-    nthPositionCache = {used:1},
     clearNthPositionCache = function(){
-      if(nthPositionCache.used){
+      if(nthPositionCache.length){
         nthPositionCache = {
           child:{},
           lastchild:{},
@@ -603,7 +604,9 @@
           length:0
         }
       } 
-    }
+    },
+    nthPositionCache = {length:1}
+
     clearNthPositionCache()
 
   var 
