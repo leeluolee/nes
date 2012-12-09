@@ -63,14 +63,14 @@ function( require, Benchmark, document, selectors ) {
 		// Selector engines
 		engines = {
 			"qsa":            "d.querySelectorAll( s )",
-			// "nwmatcher":      "NW.Dom.select( s, d )",
-			// "Q" : "Q(s,d)",
+			"nwmatcher":      "NW.Dom.select( s, d )",
+			"Q" : "Q(s,d)",
 			// "qwery" : "qwery(s, d)",  //很小巧的库
 			"sizzle":         "Sizzle( s, d )",
-			"../../../nes":  "nes.all(s,d)",
+			"../../../nes":  "nes._get(s,d)",
 			// "sly" : "Sly.search(s,d)", //诶不说啥了
 			// "zest" : "zest(s, d)",
-			// "baidu" : "baidu.query(s, d)",
+			"baidu" : "baidu.query(s, d)"
 			// "NES":"NES.get(s,d)"//nes 二代
 		},
 

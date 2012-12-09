@@ -1,4 +1,5 @@
 var sls = [
+" div",
 ":last-child input",
 ":last-child a",
 ":last-child p",
@@ -40,8 +41,9 @@ var sls = [
 ":last-child",
 ":only-child",
 ":nth-match(3 of a)",
-"a:nth-child(3)"
+":nth-child(2n+1)"
 ]
+
 
 
 var Support = {
@@ -68,7 +70,7 @@ var createNthTest = function(){
   }
 }
 
-createNthTest()
+// createNthTest()
 
 var genCompond = function(){
   var result = []
@@ -106,7 +108,7 @@ var genSelector = function(){
 
 
 var log = new _$log()
-var container = document.getElementById("context")
+var container = window.container= document.getElementById("context")
 var getSelector = function(index){
   if(sls[index]){
     process(sls[index],container)
@@ -132,7 +134,7 @@ var process= function(sl,container){
       qsa = "qsq失败"
     }
     try{
-      nw =Sizzle( sl, container).length
+      nw =NW.Dom.select( sl, container).length
     }catch(e){
       nw = "sizzle失败"
     }

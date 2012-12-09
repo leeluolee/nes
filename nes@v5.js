@@ -1,3 +1,9 @@
+/**
+ * nes.
+ */
+
+
+
 !function(win, doc){
 
   // ##简介
