@@ -1,5 +1,15 @@
-!function(win,doc){
-  var nes = {}
+!function(win, doc){
+
+  // ##简介
+  // 源码重构了两次，现在除了一两个主处理函数，所有函数都低于20行
+  // 完全的__面向过程__编程，不喜勿喷，通常你可以在调用函数的附近找到被调用函数
+  // 整个实现过程你可以找到一点点解析生成的感觉，因为整个选择器都是动态的
+  // 连parser也是
+  
+  // __nes__: 命名空间
+  // 本来想做个Wrapper类(类JQeruy)，想想还是做个纯粹的选择器吧
+  // nes目前仅作为all方法的alias
+  var nes = function(sl,context){return new NES(sl, context)},
     prevNes = win.nes
 
   nes.version = "0.0.3"
@@ -14,20 +24,38 @@
     testNode = doc.createElement("div"),
     // ###Helper(助手函数)
 
-    // 将类数组(如Nodelist、Argument)变为数组
-    toArray = function(arr){
-      return slice.call(arr)
-    },
     // 够用的短小类型判断 
     typeOf = function(o){
-      return o == null? String(o):
+      return o == null? String(o) : 
                 op.toString.call(o).slice(8, -1).toLowerCase()
     },
+    // 够用的简单对象扩展
     extend = function(o1, o2, override){
       for(var i in o2){
         if(o1[i] == null || override) o1[i] = o2[i]
       }
     },
+    // 将类数组(如Nodelist、Argument)变为数组
+    toArray = function(arr){
+      return slice.call(arr)
+    },
+    // 让setter型函数fn支持object型的参数 
+    // 即支持`set(name:value)` 
+    // 也支持`set({name1:value1,name2:value2})`
+    autoSet = function(fn){
+      return function(key, value) {
+        if (typeOf(key) == "object") {
+          for (var i in key) {
+            fn.call(this, i, key[i])
+          }
+        } else {
+          fn.call(this, key, value)
+        }
+        return this;
+      }
+    },
+    // 先进先出缓存队列, max设置最大缓存长度, 为了不必要重复parse
+    // nes会多次用到这个方法创建cache
     createCache = function(max){
       var keys = [],
         cache = {}
@@ -44,23 +72,10 @@
             if(typeof key === "undefined") return cache
             return cache[key]
           },
+          // 这个方法返回的对象有length属性，
+          // 你可以通过设置这个length后续调整缓存大小
           length:max
         }
-    },
-    // 让setter型函数fn支持object型的参数 
-    // 即支持`set(name:value)` 
-    // 也支持`set({name1:value1,name2:value2})`
-    autoSet = function(fn){
-      return function(key, value) {
-        if (typeOf(key) == "object") {
-          for (var i in key) {
-            fn.call(this, i, key[i])
-          }
-        } else {
-          fn.call(this, key, value)
-        }
-        return this;
-      }
     }
   // Fixed: toArray 低于IE8的 Nodelist无法使用slice获得array
   try{
@@ -98,185 +113,20 @@
     return -1
   } 
 
-  // Parser 相关
-  var 
-    //抽离出字匹配数目
-    ignoredRef = /\(\?\!|\(\?\:/,
-    extractRefNum = function(regStr){
-      var left = right = 0,
-        len = regStr.length,
-        ignored = regStr.split(ignoredRef).length-1//忽略非捕获匹配
-
-      for(;len--;){
-        var letter = regStr.charAt(len)
-        if(len==0 || regStr.charAt(len-1)!=="\\"){ //不包括转义括号
-          if(letter === "(") left++
-          if(letter === ")") right++
-        }
-      }
-      if(left !== right) throw regStr+"中的括号不匹配"
-      else return left - ignored
-    },
-    //前向引用 如\1 \12 等在TRUNK合并时要做处理
-    refIndexReg = /\\(\d+)/g,  
-    extractRefIndex = function(regStr, curIndex){
-      return regStr.replace(refIndexReg,function(a,b){
-        return "\\"+(parseInt(b) + curIndex)
-      })
-    },
-    createAction = function(name){
-      return function(all){
-        var parsed = this.parsed,
-          current = parsed[name] || (parsed[name] = []) 
-        current.push(slice.call(arguments))
-      }
-    },
-    keys = Object.keys || function(obj){
-      var result = [];
-      for (var prop in obj) {
-        if (obj.hasOwnProperty(prop)) result.push(prop);
-      }
-      return result
-    }
-
-  //    parse主逻辑
-  // ----------------
-  var Parser = function(opts){
-    opts = opts || {}
-    if(opts.macros) this._macros = opts.macros
-    this._links = {} //symbol link map
-    this._rules = {} //symbol def
-    this.TRUNK = null
-    this.cache = createCache(opts.maxCache || 200)
-  }
-
-  extend(Parser.prototype,{
-    parse:function(input){
-      if(parsed = this.cache.get(input)) return parsed
-      var parsed = this.parsed = [[null]],
-        remain = this.input = input,
-        TRUNK = this.TRUNK
-
-      while(remain != (remain = remain.replace(TRUNK,this._process.bind(this)))){}
-      if(remain!=='') this.error(remain)
-      return this.cache.set(input, parsed)
-    },
-    on:function(rules){
-      if(typeOf(rules) === "string"){ //当不是hash传入时
-        var tmp ={}
-        tmp[rules] = arguments[1]
-        rules = tmp
-      }
-      for(var i in rules){
-
-        var rule = rules[i] 
-        if(typeOf(rule) !== "object"){
-          rule = {regexp:rule}
-        }
-        var reg = rule.regexp
-        if(typeOf(reg) === "regexp"){
-          rule.regexp = reg.toString().slice(1, -1) 
-        } 
-        if(rule.order === undefined) rule.order = 1
-        this._rules[i] = rule
-      }
-      this._setup()
-      return this
-    },
-    off:function(name){
-      if(typeOf(name) === "array"){
-        for(var i = name.length;i--;){
-          this.off(name[i])
-        }
-      }else{
-        if(this._rules[name]){
-          delete this._rules[name]
-        }
-      }
-      return this
-    },
-    current:function(){
-      var data = this.parsed
-      var piece = data[data.length-1],
-        len = piece.length
-      return piece[len-1] || (piece[len-1] = {tag:"*"})
-    },
-    error:function(info){
-      throw Error("输入  "+this.input+"  含有未识别语句:"+info||"")
-    },
-    clone:function(parser){
-      return new Parser()
-    },
-    // 重新生成Trunk
-    _process:function(){
-      var links = this._links,
-        rules = this._rules,
-        args = slice.call(arguments)
-
-      for(var i in links){
-        var 
-          link = links[i],
-          retain =link[1]
-
-        var index = parseInt(link[0]) 
-        if(args[index] && (rule = rules[i])){
-          rule.action.apply(this, args.slice(index, index + retain))
-          return ""
-        }
-      }
-      return ""
-    },
-    _setup:function(){
-      var curIndex = 1, //当前下标
-        splits = [],
-        rules = this._rules,
-        links = this._links,
-        ruleNames = keys(rules).sort(function(a, b){
-          return rules[a].order >= rules[b].order
-        }),
-        len = ruleNames.length;
-
-      for(; len--;){
-        var i= ruleNames[len],
-          rule = rules[i],
-          retain = extractRefNum(rule.regexp)+1 // 1就是那个all
-
-        if(!rule.action) rule.action = createAction(i)// 创建一个action
-        links[i] = [curIndex ,retain] //分别是rule名，参数数量
-        var regexp =  extractRefIndex(rule.regexp, curIndex-1);
-        curIndex += retain;
-        splits.push(regexp)
-      }
-      this.TRUNK = new RegExp("^(?:("+splits.join(")|(")+"))")
-      console.log(this.TRUNK)
-      console.log(links)
-      return this
-    }
-  })
-
-  // ##简介
-  // 源码重构了两次，现在除了一两个主处理函数，所有函数都低于20行
-  // 完全的__面向过程__编程，不喜勿喷，通常你可以在调用函数的附近找到被调用函数
-  // 整个实现过程你可以找到一点点解析生成的感觉，因为整个选择器都是动态的
-  // 连parser也是
-  
-  // __nes__: 命名空间
-  // 本来想做个Wrapper类(类JQeruy)，想想还是做个纯粹的选择器吧
-  // nes目前仅作为all方法的alias
-
   // ## Parse 开始
 
   // 与parse部分关系紧密的属性在这里定义,
   // 首先是一些parse会用到的但是不是语法组成部分的RegExp，
 
-
-
-
-
   var 
     replaceReg = /\{\{([^\}]*)\}\}/g, //替换rule中的macro
+    esReg = /[-[\]{}()*+?.\\^$|,#\s]/g, //需转移字符
     nthValueReg = /^(?:(\d+)|([+-]?\d*)?n([+-]\d+)?)$/,// nth伪类的value规则
     posPesudoReg =  /^(nth)[\w-]*(-of-type|-child)/, //判断需要pos
+
+    // ### TRUNK
+    // 所有的语法最后都会组装到这个TRUNK变成一个巨型RegExp  
+    TRUNK = null, 
 
     // 第一个cache 用来装载nth伪类中的参数解析后的数据
     // 如nth-child、nth-of-type等8个伪类
@@ -354,28 +204,28 @@
         // 分隔符 如 ，
         reg:"{{split}}",
         action:function(all){
-          this.parsed.push([null])
-        },
-        order:0
+          var data = this.data
+          data.push([null])
+        }
       },
       // id 如 #home
       id:{
         reg:"#({{word}}+)",
-        action:function(all,id){
+        action:function(all, id){
           this.current().id = id
         }
       },
       // 节点类型选择符 如 div
       tag:{
         reg:"\\*|\\w+",// 单纯的添加到
-        action:function(tag){
-          this.current().tag = tag.toLowerCase()
+        action:function(all){
+          this.current().tag = all.toLowerCase()
         }
       },
       // 类选择符 如 .m-home
       classList:{
         reg:"\\.({{word}}+)",
-        action:function(all,className){
+        action:function(all, className){
           var current = this.current(),
             classList = current.classList || (current.classList = [])
           classList.push(className)
@@ -418,16 +268,33 @@
       },
       // 伪元素可以实现么？ 占位
       combo:{
-        reg:"\\s*({{combo}})\\s*",
-        action:function(all,combo){
-          var data = this.parsed,
+        reg:"{{combo}}",
+        action:function(all){
+          var data = this.data
             cur = data[data.length-1]
-          this.current().combo = combo
+          this.current().combo = all
           cur.push(null)
-        },
-        order:0
+        }
+      }
+    },
+    links={} // symbol link 当setup之后会产生一个map来实现exec之后的参数对应
+
+  //分析出regexp中的子匹配数，__参数定位关键之一__
+  var ignoredReg = /\(\?\!|\(\?\:/
+  var extractReg = function(regStr){
+    var left = right = 0,len = regStr.length
+      ignored = regStr.split(/\(\?\!|\(\?\:/).length-1//忽略非捕获匹配
+
+    for(;len--;){
+      var letter = regStr.charAt(len)
+      if(len==0 || regStr.charAt(len-1)!=="\\"){ //不包括转义括号
+        if(letter === "(") left++
+        if(letter === ")") right++
       }
     }
+    if(left !== right) throw regStr+"中的括号不匹配"
+    else return left - ignored
+  }
   //这里替换掉Rule中的macro
   var cleanRule = function(rule){
     var reg = rule.reg
@@ -446,32 +313,123 @@
     }
     return rules
   }
-  // TODO:把这边的clean集成进去
-  var parser = new Parser()
-  var parser2 = parser.clone()
-    .on({
-      "group":function(){
 
-      } 
-    })
-  cleanRules(rules)
-  parser.on(rules)
+  // API: 1. addRule         
+  // ----------------
+  // 自定义规则, 增加全新语法
+  // __options:__
+  // 1. name{string} 虽然可以随机生成，但是为了可维护起见，我改成了必须实名
+  // 2. rule 规则对象它包括
+  //    * reg{string|regexp}:    规则的标准RegExp表达 __不可忽略__
+  //    * action: parse时的动作 参数与__reg__相关(exec后的匹配) __可忽略__
+  //    * filter: find时的过滤操作 参数与__action__有关 __可忽略__
+  // 
+  // 具体例子可以参考上方的rules对象,需要说明的是action回调中的this对象指向parsed
+  // data对象,而filter中的node参数为当前遍历到的node
+  var addRule = addRule = function(name, rule){
+    if(typeOf(name) === "object"){
+      for(var i in name){
+        addRule(i,name[i])
+      }
+    }else{
+      if(rules[name]) throw Error("addRule失败:已有相同规则名存在:"+name)
+      rules[name] = rule
+    }
+    setup() //每次添加新规则后都重新组装一边
+    return name //返回name
+  },
+  createAction = function(name){
+    return function(all){
+      alert("hahai")
+      var current = this.current()
+      current[name] = toArray(arguments)
+    }
+  },
+  setupOneRule = function(rule,name,splits,curIndex){
+    var retain = 0,
+      regexp = rule.regexp,
+      filter = rule.filter,
+      retain = extractReg(regexp)+1 // 需要保留的参数
+    links[curIndex] = [name,retain] //分别是rule名，参数数量
+    curIndex += retain
+    splits.push(regexp)
+    if(!rule.action){
+      rule.action = createAction(name)
+    }
+    if(filter && !filters[name]){
+      filters[name] = rule.filter //将filter转移到filters下
+    }
+    return curIndex
+  }
+  // 组装
+  // ------
+  // 组装处理三件事:
+  // 1. 生成symbol link 生成exec结果与action参数的对应
+  // 2. 替换{}占位符，并生成Big Trunk
+  // 3. 生成默认 action
+  var setup = function(){
+    var curIndex = 1, //当前下标
+      splits = []
+    cleanRules(rules)
+    for(var i in rules){
+      if(rules.hasOwnProperty(i)){// 这里把combo放置到最后
+        curIndex = setupOneRule(rules[i], i,splits, curIndex)
+      }
+    }
+    TRUNK = new RegExp("^(?:("+splits.join(")|(")+"))")
+    cleanReg = new RegExp("\\s*(,|" + macros.combo + "|" + macros.operator + ")\\s*","g")
+  }
 
   
   //    parse主逻辑
   // ----------------
   var 
-    cleanReg =new RegExp("\\s*(,|" + macros.combo + "|" + macros.operator + ")\\s*","g")
+    cleanReg,//这个在组装时候完成
     clean = function(sl){
       return sl.trim().replace(/\s+/g," ").replace(cleanReg,"$1")
-    }
+    },
     // Process:处理每次匹配的函数
     // --------------------------
     // 1. 根据symbol link 散布参数
+    process = function(){
+
+      var parsed = this,
+        args = slice.call(arguments),
+        ruleName, link, rule, index
+        for(var i in links){
+          link = links[i]
+          ruleName = link[0]
+          retain =link[1]
+          index = parseInt(i) 
+          if(args[i] && (rule = rules[ruleName])){
+            rule.action.apply(this,args.slice(index,index+retain))
+          }
+        }
+      return ""
+    },
+    parseCache = createCache(200)
+
   var parse = function(sl){
-    sl = clean(sl)
-    console.log(parser.parse(sl),sl)
-    return parser.parse(sl)    
+    
+    var selector = remain = clean(sl),parsed
+    if(parsed = parseCache.get(selector)) return parsed
+
+    var parsed = {},
+      data = parsed.data = [[null]],
+      part
+
+    parsed.error = function(msg){
+      throw Error("选择符\"" + sl + "含有味识别的选择器:Syntax Error")
+    }
+    parsed.current = function(){
+      var piece = data[data.length-1],
+        len = piece.length
+      return piece[len-1] || (piece[len-1] = {tag:"*"})
+    }
+    while(remain != (remain = remain.replace(TRUNK,process.bind(parsed)))){
+    }
+    if(remain !== "") parsed.error()
+    return parseCache.set(selector, parsed)
   }
   
   //   3. Finder
@@ -494,32 +452,45 @@
         return "href" in node ? node.getAttribute("href",2):node.getAttribute("href")
       }
     },
-    checkNth = function(node,type){
-      if(type) return node.nodeName === type  
-      else return node.nodeType === 1
-    },
+  
     nthChild = function(node, n, type){
       var node = node.firstChild
       if(!node) return 
-      if(checkNth(node, type)) n--
+      if(type){
+        if(node.nodeName === type) n--
+      }else{
+        if(node.nodeType === 1) n--
+      }
       return nthNext(node,n, type)
     },
     nthLastChild =  function(node, n, type){
       var node = node.lastChild
       if(!node) return 
-      if(checkNth(node, type)) n--
+      if(type){
+        if(node.nodeName === type) n--
+      }else{
+        if(node.nodeType === 1) n--
+      }
       return nthPrev(node, n, type)
     },
     nthPrev = function(node, n, type){
       while(n && (node = node.previousSibling)){
-        if(checkNth(node, type)) n--
+        if(type){
+          if(node.nodeName === type) n--
+        }else{
+          if(node.nodeType === 1) n--
+        }
       }
       return node
     },
     // 向后查找n个节点元素
     nthNext =  function(node, n, type){
       while(n && (node = node.nextSibling)){
-        if(checkNth(node, type)) n--
+        if(type){
+          if(node.nodeName === type) n--
+        }else{
+          if(node.nodeType === 1) n--
+        }
       }
       return node
     },
@@ -588,16 +559,18 @@
     createNthFilter = function(isNext, isType){
       var next, prev, cache, getStart
       if(isNext){
-        cache = nthPositionCache[""+(isType? "type" : "child")]
+        cache = nthPositionCache[""+(isType?"type":"child")]
         next = nthNext
         prev = nthPrev
         getStart = nthChild
       }else{
-        cache = nthPositionCache["last"+(isType? "type" : "child")]
+        cache = nthPositionCache["last"+(isType?"type":"child")]
         prev = nthNext
         next = nthPrev
         getStart = nthLastChild
       }
+
+      
       return function (node, param){
         if(node === root) return false // 如果是html直接返回false 坑爹啊
         var _uid = getUid(node),
@@ -965,9 +938,7 @@
     if(!results.length) return results
     if(len>1) distinct(results)
     results.sort(sortor) 
-    nthPositionCache
     clearNthPositionCache()
-    nthPositionCache
     return results
   } 
   // API 4: 测试用get相当于all (private)
@@ -975,8 +946,9 @@
   // 为了测试时避免原生querySelector的影响
   // 
   var get = function(sl, context){
-    var data = parse(sl)
+    var data = parse(sl).data
     var result =  find(data, context||doc)
+
     return result
   }
 
@@ -1027,7 +999,7 @@
   // 即与all、one函数的支持是一样的
   // 由于:not与:matches依赖于这个函数 ,所以同样支持复杂选择器
   var matches = function(node,sl){
-    var datas = parse(sl)
+    var datas = parse(sl).data,
       len = datas.length
     for( ;len--; ){
       if(matchOneData(node,datas[len])) return true
@@ -1068,7 +1040,7 @@
   // __注意只支持单节点__ :即
   // 如:nes.create("p#id.class1.class2")
   var create = function(sl){
-    var data = parse(sl)
+    var data = parse(sl).data[0],
       len = data.length,
       datum, parent, current, prev
     for(var i = 0; i < len; i++){
@@ -1085,7 +1057,7 @@
   // ASSEMBLE
   // ----------------
 
-  // setup()                     // 动态组装parser
+  setup()                     // 动态组装parser
   // 生成pesudo 、 operator、combo 等expand方法
   // ----------------------------------------------------------------------
   ;(function createExpand(host,beforeAssign){
@@ -1145,7 +1117,7 @@
       return sl? nes.all(sl, this.elements[0]) : this.elements
     },
     filter:function(sl){
-      return filter(toArray(this.elements), parse(sl))
+      return filter(toArray(this.elements), parse(sl).data[0])
     },
     parent:function(sl){
       var first = this.elements[0],
@@ -1182,6 +1154,7 @@
   extend(nes,{
     // setting stuff 设置它们的length控制缓存
     nthCache: nthCache,
+    parseCache :parseCache,
     // 是否用节点缓存节点位置,默认true
     usePositionCache: true,
 
@@ -1204,6 +1177,7 @@
     // combos:combos
 
     // 规则扩展API
+    addRule:addRule,
     fn: NES.prototype
     // 
   })
@@ -1229,4 +1203,21 @@
   }
 
 }(window,document)
+  // TODO: 内容
+  // 1. 重构 √
+  // 2. 自定义ruler 并setup  √
+  // 3. nthChild方法的重构 直接从childNodes中进行判断而不是同级游走 X 测试结果排除
+  // 4. 准备{a,b}(类似regexp的例子) √
+  // 5. 准备好pesudo(incude?) attr combo的例子 √
+  // 6. try cache 捕获未被系统识别的selector √
+  // 7. 准备好delegate Event的例子 √
+  // 9. Wrapper扩展接口  
+  // 10.nwmatcher提到几个兼容性处理 
+  // 11.调用combo、operator时候动态将规则写进macro中并setup √
+  // 12.将combo的优先级降到最低 (因为单字符更容易被匹配到) X 暂时不做
+  // 13.完成nth的优化
+  // 14. 做好find的demo 、做好Wrapper类 构思好如何扩展
+  // 
+  // 
+// HAHAHA
 

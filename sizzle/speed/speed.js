@@ -63,8 +63,9 @@ function( require, Benchmark, document, selectors ) {
 		// Selector engines
 		engines = {
 			"qsa":            "d.querySelectorAll( s )",
-			"nwmatcher":      "NW.Dom.select( s, d )",
+			// "nwmatcher":      "NW.Dom.select( s, d )",
 			"Q" : "Q(s,d)",
+			"mojoQuery": "mojoQuery(s,d)",
 			// "qwery" : "qwery(s, d)",  //很小巧的库
 			"sizzle":         "Sizzle( s, d )",
 			"../../../nes":  "nes._get(s,d)",
