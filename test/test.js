@@ -17,24 +17,24 @@ var sls = [
 // ".tocline2, .tocline3, .tocline4",
 // "div.example, div.note",
 // "body",
-// "div",
-// //各种连接符  //我草 body 在container外面了 也可以取到？
-// "body p",
-// "body div",
-// "div p",
-// "div > p",
-// "div + p",
-// "div ~ p",
-// "div[class^=exa][class$=mple]",
-// "div p a",
-// "div > p > a",
-// "div.example > p > a",
-// "div + p + a",
-// "div ~ p ~ p",
-// "div, p, a",
-// "ul.toc li.tocline2",
-// "ul.toc > li.tocline2",
-// "h1#title + div > p",
+"div",
+//各种连接符  //我草 body 在container外面了 也可以取到？
+"body p",
+"body div",
+"div p",
+"div > p",
+"div + p",
+"div ~ p",
+"div[class^=exa][class$=mple]",
+"div p a",
+"div > p > a",
+"div.example > p > a",
+"div + p + a",
+"div ~ p ~ p",
+"div, p, a",
+"ul.toc li.tocline2",
+"ul.toc > li.tocline2",
+"h1#title + div > p",
 //各种属性
 // "a[href][lang][class]",
 // "div[class]",
@@ -61,28 +61,28 @@ var sls = [
 "p:only-of-type",
 "p:last-of-type",
 "p:first-of-type",
-// "div ul:include(li.trigger)",
-// // 要扩展的部分
-// "ul.test li.trigger & li",
-// "div[class!=made_up]",
-// "div:matches(.class1,.class,body .example)",
-// "div:not([href], body > div.example)",
-// "h1[id]:contains(Selectors)",
-// "div:target",
-// "div:matches(:first-child,:last-child)",
-// "li:nth-match( 3 of li.trigger)",
-// "meta % title",
-// "title + meta",
-// "script & div",
-// // "ul.test1 > li{,}", // === div:nth-child(n+1):not(nth-child(n+5))   即>=a   <b
-// "ul.test1 > li{1,9}", // === div:nth-child(n+1):not(nth-child(n+5))   即>=a   <b
-// "ul.test1 > li:nth-child(n+1):not(:nth-last-child(n+10))", // 相当于上一条
-// "ul.test1 > li{1,}", //从第一个到最后一个
-// "ul.test1 > li:nth-child(n+1):nth-last-child(n+1)", // 相当于上一条
-// "ul.test1 > li{,10}",//从第一个到最后一个
-// "ul.test1 > li:nth-child(n+1):not(:nth-last-child(n+11))", // 相当于上一条
-// "ul.test1 > li{1,-2}", //从第一个到倒数第二个，不包括
-// "ul.test1 > li:nth-child(n+1):nth-last-child(n+2)" // 相当于上一条
+"div ul:include(li.trigger)",
+// 要扩展的部分
+"ul.test li.trigger & li",
+"div[class!=made_up]",
+"div:matches(.class1,.class,body .example)",
+"div:not([href], body > div.example)",
+"h1[id]:contains(Selectors)",
+"div:target",
+"div:matches(:first-child,:last-child)",
+"li:nth-match( 3 of li.trigger)",
+"meta % title",
+"title + meta",
+"script & div",
+// "ul.test1 > li{,}", // === div:nth-child(n+1):not(nth-child(n+5))   即>=a   <b
+"ul.test1 > li{1,9}", // === div:nth-child(n+1):not(nth-child(n+5))   即>=a   <b
+"ul.test1 > li:nth-child(n+1):not(:nth-last-child(n+10))", // 相当于上一条
+"ul.test1 > li{1,}", //从第一个到最后一个
+"ul.test1 > li:nth-child(n+1):nth-last-child(n+1)", // 相当于上一条
+"ul.test1 > li{,10}",//从第一个到最后一个
+"ul.test1 > li:nth-child(n+1):not(:nth-last-child(n+11))", // 相当于上一条
+"ul.test1 > li{1,-2}", //从第一个到倒数第二个，不包括
+"ul.test1 > li:nth-child(n+1):nth-last-child(n+2)" // 相当于上一条
 ]
 
 var log = new _$log(document.getElementById("info"))

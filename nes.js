@@ -137,7 +137,25 @@
         if (obj.hasOwnProperty(prop)) result.push(prop);
       }
       return result
+    },
+    cleanRule = function(rule){
+      var reg = rule.reg
+      //如果已经是regexp了就转为string
+      if(typeOf(reg) === "regexp") reg = reg.toString().slice(1,-1) 
+      //将macro替换
+      rule.regexp = reg.replace(replaceReg, function(a ,b){
+        if(b in macros) return macros[b]
+        else throw new Error('can"t replace undefined macros:' +b)
+      })
+      return rule
+    },
+    cleanRules = function(rules){
+      for(var i in rules){
+        if(rules.hasOwnProperty(i)) cleanRule(rules[i])
+      }
+      return rules
     }
+
 
   //    parse主逻辑
   // ----------------
@@ -152,6 +170,7 @@
 
   extend(Parser.prototype,{
     parse:function(input){
+      input = clean(input)
       if(parsed = this.cache.get(input)) return parsed
       var parsed = this.parsed = [[null]],
         remain = this.input = input,
@@ -180,7 +199,7 @@
         if(rule.order === undefined) rule.order = 1
         this._rules[i] = rule
       }
-      this._setup()
+      this.setup()
       return this
     },
     off:function(name){
@@ -205,7 +224,7 @@
       throw Error("输入  "+this.input+"  含有未识别语句:"+info||"")
     },
     clone:function(parser){
-      return new Parser()
+      return new Parser().on(this._rules)
     },
     // 重新生成Trunk
     _process:function(){
@@ -226,7 +245,8 @@
       }
       return ""
     },
-    _setup:function(){
+    setup:function(){
+      cleanRules(this._rules)
       var curIndex = 1, //当前下标
         splits = [],
         rules = this._rules,
@@ -248,8 +268,6 @@
         splits.push(regexp)
       }
       this.TRUNK = new RegExp("^(?:("+splits.join(")|(")+"))")
-      console.log(this.TRUNK)
-      console.log(links)
       return this
     }
   })
@@ -367,7 +385,7 @@
       },
       // 节点类型选择符 如 div
       tag:{
-        reg:"\\*|\\w+",// 单纯的添加到
+        reg:"\\*|[a-zA-Z-]\\w*",// 单纯的添加到
         action:function(tag){
           this.current().tag = tag.toLowerCase()
         }
@@ -419,7 +437,7 @@
       // 伪元素可以实现么？ 占位
       combo:{
         reg:"\\s*({{combo}})\\s*",
-        action:function(all,combo){
+        action:function(all, combo){
           var data = this.parsed,
             cur = data[data.length-1]
           this.current().combo = combo
@@ -428,34 +446,6 @@
         order:0
       }
     }
-  //这里替换掉Rule中的macro
-  var cleanRule = function(rule){
-    var reg = rule.reg
-    //如果已经是regexp了就转为string
-    if(typeOf(reg) === "regexp") reg = reg.toString().slice(1,-1) 
-    //将macro替换
-    rule.regexp = reg.replace(replaceReg, function(a ,b){
-      if(b in macros) return macros[b]
-      else throw new Error('can"t replace undefined macros:' +b)
-    })
-    return rule
-  }
-  var cleanRules = function(rules){
-    for(var i in rules){
-      if(rules.hasOwnProperty(i)) cleanRule(rules[i])
-    }
-    return rules
-  }
-  // TODO:把这边的clean集成进去
-  var parser = new Parser()
-  var parser2 = parser.clone()
-    .on({
-      "group":function(){
-
-      } 
-    })
-  cleanRules(rules)
-  parser.on(rules)
 
   
   //    parse主逻辑
@@ -468,9 +458,10 @@
     // Process:处理每次匹配的函数
     // --------------------------
     // 1. 根据symbol link 散布参数
+  var parser = new Parser()
+  parser.on(rules) //生成规则
+
   var parse = function(sl){
-    sl = clean(sl)
-    console.log(parser.parse(sl),sl)
     return parser.parse(sl)    
   }
   
@@ -1036,52 +1027,6 @@
   } 
   
 
-  //      Creator 开始
-  // ----------------------
-  var createNode = function(option){
-    var tag = option.tag,
-      node = doc.createElement(tag == "*"? "div":option.tag),
-      creater
-    for(var i in option){
-      if(creater = ExpandCreater[i]){
-        creater(node, option[i])
-      }
-    }
-    return node
-  }
-  var ExpandCreater = {
-    id:function(node, id){
-      node.id = id
-    },
-    classList: function(node, classList){
-      node.className = classList.join(" ")
-    },
-    attributes:function(node, attributes){
-      var len = attributes.length, attribute
-      for(;len--;){
-        attribute = attributes[len]
-        node.setAttribute(attribute.key, typeof attribute.value == "undefined"? true : attribute.value)
-      }
-    }
-  }
-  // API 6: 按Simple Selector生成dom节点
-  // __注意只支持单节点__ :即
-  // 如:nes.create("p#id.class1.class2")
-  var create = function(sl){
-    var data = parse(sl)
-      len = data.length,
-      datum, parent, current, prev
-    for(var i = 0; i < len; i++){
-      datum = data[i]
-      if(i !== len-1 && datum.combo !== ">") throw Error("节点创建不能传入非>连接符")
-      prev = current
-      current = createNode(datum)
-      if(!parent){ parent = current}
-      if(prev) prev.appendChild(current)
-    }
-    return parent
-  }
-  
   // ASSEMBLE
   // ----------------
 
@@ -1107,77 +1052,16 @@
       var befores= macros.operator.split("]")
       befores.splice(1,0,key.charAt(0)+"]")
       macros.operator = befores.join("")
-      setup()
+      parser.setup()
     },
     "combos": function(key){
       var befores= macros.combo.split("]")
       befores.splice(1,0,key+"]")
       macros.combo = befores.join("")
-      setup()
+      parser.setup()
     }
   })
 
-
-  //5.Wrapper 类
-  //使用
-  // nes("ul.test1").parent("div")
-
-  var NES = function(sl,context){
-    var type = typeOf(sl)
-    if(type ==="string"){
-      this.elements = nes.all(sl, context)
-    }else if(sl.nodeType ===1){
-      this.elements = [sl]
-    }else{
-      this.elements = toArray(sl)
-    }
-    if(!this.elements.length) throw Error("未找到所要包装的节点")
-  }
-  extend(NES.prototype, {
-    eq:function(i){
-      return this.elements[i]
-    },
-    one:function(sl){
-      var first = this.elements[0]
-      return sl? nes.one(sl, first) : first
-    },
-    all:function(sl){
-      return sl? nes.all(sl, this.elements[0]) : this.elements
-    },
-    filter:function(sl){
-      return filter(toArray(this.elements), parse(sl))
-    },
-    parent:function(sl){
-      var first = this.elements[0],
-        parent = first.parentNode
-
-      while(parent&&parent!==doc){
-        if(!sl || matches(parent, sl)) return parent
-        parent = parent.parentNode
-      }
-      return null
-    },
-    next:function(sl){
-      var first = this.elements[0],
-        next = nthNext(first, 1)
-
-      while(next){
-        if(!sl || matches(next, sl)) return next
-        next = nthNext(next, 1)
-      }
-      return null
-    },
-    prev:function(sl){
-      var first = this.elements[0],
-        prev = nthPrev(first, 1)
-
-      while(prev){
-        if(!sl || matches(prev, sl)) return prev
-        prev = nthPrev(prev, 1)
-      }
-      return null
-    }
-  })
 
   extend(nes,{
     // setting stuff 设置它们的length控制缓存
@@ -1187,6 +1071,7 @@
 
     // 测试接口
     parse: parse, //解析
+    parser:parser, //parser
     find: find,   //查找
     _get: get,     //测试时排除原生querySelector的影响
 
@@ -1195,22 +1080,16 @@
     one:one,
     all:all,
     matches:matches,
-    create:create,
-    not: function(node, sl){return !matches(node,sl)},
     // 内建扩展 api
 
     // pesudos:pesudos, 这三个已经内建
     // operators:operators
     // combos:combos
-
-    // 规则扩展API
-    fn: NES.prototype
-    // 
   })
 
   //          5.Exports
   // ----------------------------------------------------------------------
-  // 暴露API:  amd || commonjs || NEJ define || global 
+  // 暴露API:  amd || commonjs  || global 
   // 支持commonjs
   if (typeof exports === 'object') {
     module.exports = nes
