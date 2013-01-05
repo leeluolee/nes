@@ -58,18 +58,6 @@ container.addEventListener("click", function(e){
 },false)
 ```
 
-* `nes.create(String selector)`(同mootools的new Element):通过选择器生成简单节点，如`nes.create(ul#id.class1.class2>li.item>a[alt=haah])`输出:
-
-```html
-<ul id="id" class="class1 class2">
-  <li class="item">
-    <a alt="haah"></a>
-  </li>
-</ul>
-```
-
-__注意__: 只支持单节点的嵌套和'>'连接符,复杂逻辑请用模版或手动生成
-
 __一般开发人员看到这里就可以结束__, 需要有更深入了解和扩展需求的继续向下。
 
 
@@ -239,29 +227,8 @@ nes.addRule("range",{
 
 __注意__:扩展的语法的正则式要描述清楚，否则可能会覆盖内建的规则。
 
-### 2.4 包装器
 
-提供几个常用的便利接口，:
-__警告__: 可能会立刻被移除, 因为这不是一个纯洁的选择器该做的事
-
-__API__:
-```javascript
-nes(sl).one(sl2) == nes.all(sl2, nes.all(sl))
-
-nes(sl).all(sl2） == nes.all(sl2, nes.all(sl))
-
-nes(sl).parent(sl2) 返回最近的满足sl2的父节点
-
-nes(sl).filter(sl2) 返回符合sl2的节点集
-
-nes(sl).next(sl2) 返回下一个符合sl2的兄弟节点
-
-nes(sl).prev(sl2) 返回上一个符合sl2的兄弟节点
-```
-
-__扩展包装器__: `nes.fn.xxx= fn` 类似于jQuery，如果觉得这个有用，可以给我提意见，因为选择器跟jQuery这种包装对象不同，它必须返回节点集，而jQuery的包装对象本身就可以操作。
-
-### 2.5 几个可能会用到的配置属性
+### 2.4 几个可能会用到的配置属性
 
 1. `nes.parseCache.length`: 控制最大parse缓存，默认200
 2. `nes.nthCache.length` : 控制最大nth伪类参数的parse缓存，默认100

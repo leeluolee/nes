@@ -1,0 +1,101 @@
+<!DOCTYPE html>  <html> <head>   <title>extend_parser.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="extend_combo.html">                 extend_combo.js               </a>                                           <a class="source" href="extend_operator.html">                 extend_operator.js               </a>                                           <a class="source" href="extend_parser.html">                 extend_parser.js               </a>                                           <a class="source" href="extend_pesudo.html">                 extend_pesudo.js               </a>                                           <a class="source" href="extend_rule.html">                 extend_rule.js               </a>                                           <a class="source" href="nes.html">                 nes.js               </a>                                           <a class="source" href="nes2.html">                 nes2.js               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               extend_parser.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <h2>     Creator 开始</h2>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="kd">var</span> <span class="nx">parser2</span> <span class="o">=</span> <span class="nx">nes</span><span class="p">.</span><span class="nx">parser</span><span class="p">.</span><span class="nx">clone</span><span class="p">()</span>
+    <span class="p">.</span><span class="nx">off</span><span class="p">([</span><span class="s2">&quot;pesudos&quot;</span><span class="p">,</span><span class="s2">&quot;split&quot;</span><span class="p">])</span>
+    <span class="p">.</span><span class="nx">on</span><span class="p">({</span>
+      <span class="s2">&quot;group&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="nx">reg</span><span class="o">:</span><span class="sr">/\((.*)\)/</span><span class="p">,</span>
+        <span class="nx">action</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">all</span><span class="p">,</span> <span class="nx">capture</span><span class="p">){</span>
+          <span class="k">this</span><span class="p">.</span><span class="nx">current</span><span class="p">().</span><span class="nx">group</span> <span class="o">=</span> <span class="nx">capture</span>
+          <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">capture</span><span class="p">)</span>
+        <span class="p">},</span>
+        <span class="nx">order</span><span class="o">:</span><span class="mi">9</span>
+      <span class="p">},</span>
+      <span class="s2">&quot;repeat&quot;</span><span class="o">:</span><span class="p">{</span>
+        <span class="nx">reg</span><span class="o">:</span><span class="sr">/\*([1-9]\d*)/</span><span class="p">,</span>
+        <span class="nx">action</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">all</span><span class="p">,</span> <span class="nx">num</span><span class="p">){</span>
+          <span class="k">this</span><span class="p">.</span><span class="nx">current</span><span class="p">().</span><span class="nx">repeat</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">num</span><span class="p">)</span>
+          <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">num</span><span class="p">)</span>
+        <span class="p">},</span>
+        <span class="nx">order</span><span class="o">:</span><span class="mi">8</span>
+    <span class="p">})</span>
+  <span class="kd">var</span> <span class="nx">createNode</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">option</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">tag</span> <span class="o">=</span> <span class="nx">option</span><span class="p">.</span><span class="nx">tag</span><span class="p">,</span>
+      <span class="nx">group</span> <span class="o">=</span> <span class="nx">option</span><span class="p">.</span><span class="nx">group</span><span class="p">,</span>
+      <span class="nx">creater</span>
+    <span class="k">if</span><span class="p">(</span><span class="nx">group</span><span class="p">){</span>
+      <span class="nx">node</span> <span class="o">=</span>  <span class="nx">create</span><span class="p">(</span><span class="nx">group</span><span class="p">)</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">else</span><span class="p">{</span>
+      <span class="nx">node</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">tag</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="o">?</span> <span class="s2">&quot;div&quot;</span><span class="o">:</span><span class="nx">option</span><span class="p">.</span><span class="nx">tag</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="k">in</span> <span class="nx">option</span><span class="p">){</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">creater</span> <span class="o">=</span> <span class="nx">ExpandCreater</span><span class="p">[</span><span class="nx">i</span><span class="p">]){</span>
+        <span class="nx">creater</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="nx">option</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">if</span><span class="p">(</span><span class="nx">option</span><span class="p">.</span><span class="nx">repeat</span><span class="p">){</span><span class="c1">//如果重复数</span>
+      <span class="kd">var</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createDocumentFragment</span><span class="p">()</span>
+      <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">option</span><span class="p">.</span><span class="nx">repeat</span><span class="p">;</span><span class="nx">len</span><span class="o">--</span><span class="p">;){</span>
+        <span class="nx">parent</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">len</span> <span class="o">==</span><span class="mi">0</span><span class="o">?</span><span class="nx">node</span><span class="o">:</span> <span class="nx">node</span><span class="p">.</span><span class="nx">cloneNode</span><span class="p">(</span><span class="kc">true</span><span class="p">))</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="nx">parent</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">node</span>
+  <span class="p">}</span>
+  <span class="kd">var</span> <span class="nx">ExpandCreater</span> <span class="o">=</span> <span class="p">{</span>
+</pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>group与tag特殊</p>             </td>             <td class="code">               <div class="highlight"><pre>
+    <span class="nx">id</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="nx">id</span><span class="p">){</span>
+      <span class="nx">node</span><span class="p">.</span><span class="nx">id</span> <span class="o">=</span> <span class="nx">id</span>
+    <span class="p">},</span>
+    <span class="nx">classList</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="nx">classList</span><span class="p">){</span>
+      <span class="nx">node</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="nx">classList</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+    <span class="p">},</span>
+    <span class="nx">attributes</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="nx">attributes</span><span class="p">){</span>
+      <span class="kd">var</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">attributes</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="nx">attribute</span>
+      <span class="k">for</span><span class="p">(;</span><span class="nx">len</span><span class="o">--</span><span class="p">;){</span>
+        <span class="nx">attribute</span> <span class="o">=</span> <span class="nx">attributes</span><span class="p">[</span><span class="nx">len</span><span class="p">]</span>
+        <span class="nx">node</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="nx">attribute</span><span class="p">.</span><span class="nx">key</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">attribute</span><span class="p">.</span><span class="nx">value</span> <span class="o">==</span> <span class="s2">&quot;undefined&quot;</span><span class="o">?</span> <span class="kc">true</span> <span class="o">:</span> <span class="nx">attribute</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="kd">var</span> <span class="nx">comboFilter</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">prev</span><span class="p">,</span> <span class="nx">node</span><span class="p">,</span> <span class="nx">combo</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="nx">combo</span><span class="o">!==</span><span class="s2">&quot;&gt;&quot;</span> <span class="o">&amp;&amp;</span> <span class="nx">combo</span><span class="o">!==</span><span class="s2">&quot;+&quot;</span><span class="p">){</span>
+      <span class="k">throw</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;节点创建不能传入非&gt;或+连接符&quot;</span><span class="p">)</span>
+    <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">combo</span> <span class="o">===</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">){</span>
+        <span class="kd">var</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">prev</span>
+        <span class="nx">parent</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span>
+      <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+        <span class="nx">parent</span> <span class="o">=</span> <span class="nx">prev</span><span class="p">.</span><span class="nx">parentNode</span>
+        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">parent</span><span class="p">){</span>
+          <span class="nx">parent</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createDocumentFragment</span><span class="p">()</span>
+          <span class="nx">parent</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">prev</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="nx">parent</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="nx">parent</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+</pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>API 6: 按Simple Selector生成dom节点
+<strong>注意只支持单节点</strong> :即
+如:nes.create("p#id.class1.class2")</p>             </td>             <td class="code">               <div class="highlight"><pre>
+  <span class="kd">var</span> <span class="nx">create</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">sl</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">parser2</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">sl</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+      <span class="nx">len</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span>
+      <span class="nx">datum</span><span class="p">,</span> <span class="nx">parent</span><span class="p">,</span> <span class="nx">current</span><span class="p">,</span> <span class="nx">prev</span>
+    <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">len</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+      <span class="nx">datum</span> <span class="o">=</span> <span class="nx">data</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+      <span class="nx">prev</span> <span class="o">=</span> <span class="nx">current</span>
+      <span class="nx">current</span> <span class="o">=</span> <span class="nx">createNode</span><span class="p">(</span><span class="nx">datum</span><span class="p">)</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">i</span><span class="o">!==</span><span class="mi">0</span><span class="p">){</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">datum</span><span class="p">)</span>
+        <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">comboFilter</span><span class="p">(</span><span class="nx">prev</span><span class="p">,</span> <span class="nx">current</span><span class="p">,</span> <span class="nx">data</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">combo</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">parent</span><span class="p">)</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">node</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">parent</span>
+  <span class="p">}</span>
+  <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">create</span><span class="p">(</span><span class="s2">&quot;p#id.m-home.m-name&gt;(li#name[title=haha].name1+li.name2)*2&quot;</span><span class="p">)</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

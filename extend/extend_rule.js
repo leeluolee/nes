@@ -2,7 +2,7 @@ var time = +new Date
 // 在进行语法扩展时reg是必须的，
 // action与filter至少需要需要二选其一(根据场景不同)才能完成一个自定义规则的实施, 否则虽然不会报错
 // 但是只是匹配了，让解析器不报错，但是这个选择器什么都不会做
-nes.addRule("range",{
+nes.parser.on("range",{
   reg:/\s*\{\s*(\d*),(\-?\d*)\s*\}\s*/, 
   // action中需要注意两个部分一个是this.error()打印出解析错误信息，
   // 一个this.current()永远返回当前的Simple Selector对应的data部分这是个hash表，
@@ -32,7 +32,7 @@ nes.addRule("range",{
 })
 // 你也可以不写action.什么意思呢，就是我们可以很方边的去添加我们想要的选择器，
 // 以后可能可以实现
-nes.addRule("pesudoElement",{
+nes.parser.on("pesudoElement",{
   reg: /::(\w+)/,
   filter:function(node,args){
     console.log(args[1])

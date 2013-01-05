@@ -4,7 +4,7 @@ path = require 'path'
 {spawn, exec} = require 'child_process'
 
 task 'doc', 'Generate annotated source code with Docco', ()->
-  docco = exec 'docco ./*.js test/extend*.js', (err) ->
+  docco = exec 'docco ./*.js extend/extend*.js', (err) ->
     throw err if err
   docco.stdout.on 'data', (data) -> print data.toString()
   docco.stderr.on 'data', (data) -> print data.toString()

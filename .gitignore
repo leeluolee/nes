@@ -1,4 +1,6 @@
 *.ppt
 selector.md
 *.sublime*
-test/private
+extend/private
+*demo*
+*test2*

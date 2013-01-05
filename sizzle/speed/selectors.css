@@ -1,16 +1,3 @@
-p:nth-last-child(1)
-p:nth-last-child(2)
-p:nth-last-child(3)
-p:nth-last-child(-3n+4)
-p:nth-last-child(n+1)
-p:nth-last-child(-n+2)
-p:nth-last-child(n-3)
-p:nth-child(-n+4)
-p:nth-child(n+1)
-p:nth-child(-3n+2)
-p:nth-child(n-3)
-p:nth-child(1)
-:empty
 p:not(.example:nth-child(even)) a:first-child
 div.example[class] p:nth-of-type(2n) a:last-of-type, p:nth-of-type(3n-11) a:last-child
 div ~ p ~ p ~ p a
@@ -18,12 +5,6 @@ div ~ p ~ p ~ p a
 div ~ p + p ~ p a:first-child
 div ~ p ~ p + p[class]
 body div p a
-p:nth-child(even)
-p:nth-child(2n)
-p:nth-child(5n+1)
-p:nth-child(-3n+11)
-p:nth-child(3n-11)
-p:nth-of-type(5n+1), p:nth-of-type(3n-11)
 div.example[class] p:nth-child(2n):not(.toc2,.toc) span
 body p:first-child a[href],body div.example
 h1#title, div h1:matches(#title)
@@ -45,3 +26,22 @@ a[href][lang][class]
 div[class^=exa]
 div[class*=e]
 div:not(.example)
+p:nth-child(even)
+p:nth-child(2n)
+p:nth-child(5n+1)
+p:nth-child(-3n+11)
+p:nth-child(3n-11)
+p:nth-of-type(5n+1), p:nth-of-type(3n-11)
+p:nth-last-child(1)
+p:nth-last-child(2)
+p:nth-last-child(3)
+p:nth-last-child(-3n+4)
+p:nth-last-child(n+1)
+p:nth-last-child(-n+2)
+p:nth-last-child(n-3)
+p:nth-child(-n+4)
+p:nth-child(n+1)
+p:nth-child(-3n+2)
+p:nth-child(n-3)
+p:nth-child(1)
+:empty
