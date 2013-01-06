@@ -13,7 +13,7 @@
     // 添加zen-coding中需要的匹配
     .on({
       "group": {
-        reg:/\((.*)\)/,
+        reg:/\(([^\)]*)\)/,
         action:function(all, capture){
           this.current().group = capture
         },
@@ -94,6 +94,7 @@
     var data = parser2.parse(sl)[0],
       len = data.length,
       datum, parent, current, prev
+    console.log(data)
     for(var i = 0; i < len; i++){
       datum = data[i]
       prev = current
@@ -105,8 +106,9 @@
     }
     return parent
   }
-  var node = create("p#id.m-hd.m-bd>(li#name[tlt=ha].nm1+li.nm2)*2")
+  var node = create("p")
   console.log("-----------------zen-coding输出--------------")
   // 这里检查节点，如果信息不全，可以将这个节点
+  nes.one("body").appendChild(node)
   console.log(node)
   console.log("-----------------zen-coding输出结束--------------")

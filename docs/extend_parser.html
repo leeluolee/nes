@@ -1,11 +1,20 @@
-<!DOCTYPE html>  <html> <head>   <title>extend_parser.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="extend_combo.html">                 extend_combo.js               </a>                                           <a class="source" href="extend_operator.html">                 extend_operator.js               </a>                                           <a class="source" href="extend_parser.html">                 extend_parser.js               </a>                                           <a class="source" href="extend_pesudo.html">                 extend_pesudo.js               </a>                                           <a class="source" href="extend_rule.html">                 extend_rule.js               </a>                                           <a class="source" href="nes.html">                 nes.js               </a>                                           <a class="source" href="nes2.html">                 nes2.js               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               extend_parser.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <h2>     Creator 开始</h2>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="kd">var</span> <span class="nx">parser2</span> <span class="o">=</span> <span class="nx">nes</span><span class="p">.</span><span class="nx">parser</span><span class="p">.</span><span class="nx">clone</span><span class="p">()</span>
+<!DOCTYPE html>  <html> <head>   <title>extend_parser.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="extend_combo.html">                 extend_combo.js               </a>                                           <a class="source" href="extend_operator.html">                 extend_operator.js               </a>                                           <a class="source" href="extend_parser.html">                 extend_parser.js               </a>                                           <a class="source" href="extend_pesudo.html">                 extend_pesudo.js               </a>                                           <a class="source" href="extend_rule.html">                 extend_rule.js               </a>                                           <a class="source" href="nes.html">                 nes.js               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               extend_parser.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <h1>     zen-coding dom版本 开始</h1>
+
+<p>这里由于使用到了很多nes中的规则定义，
+所以我们直接clone nes的parser</p>
+
+<p><strong>为什么不直接添加新规则到nes.parser中?</strong>
+因为例如(li.class)*2 的group或者 repeat都是
+nes中不需要的 拖缓了速度 还增加了冲突的可能(冲突可通过order来规避，
+但是负责的parse还是不建议这样来实现，应该通过手写或者bison这种成熟解析生成)</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="kd">var</span> <span class="nx">parser2</span> <span class="o">=</span> <span class="nx">nes</span><span class="p">.</span><span class="nx">parser</span><span class="p">.</span><span class="nx">clone</span><span class="p">()</span>
+</pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>其中pesudos,分隔符也是不需要</p>             </td>             <td class="code">               <div class="highlight"><pre>
     <span class="p">.</span><span class="nx">off</span><span class="p">([</span><span class="s2">&quot;pesudos&quot;</span><span class="p">,</span><span class="s2">&quot;split&quot;</span><span class="p">])</span>
+</pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>添加zen-coding中需要的匹配</p>             </td>             <td class="code">               <div class="highlight"><pre>
     <span class="p">.</span><span class="nx">on</span><span class="p">({</span>
       <span class="s2">&quot;group&quot;</span><span class="o">:</span> <span class="p">{</span>
         <span class="nx">reg</span><span class="o">:</span><span class="sr">/\((.*)\)/</span><span class="p">,</span>
         <span class="nx">action</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">all</span><span class="p">,</span> <span class="nx">capture</span><span class="p">){</span>
           <span class="k">this</span><span class="p">.</span><span class="nx">current</span><span class="p">().</span><span class="nx">group</span> <span class="o">=</span> <span class="nx">capture</span>
-          <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">capture</span><span class="p">)</span>
         <span class="p">},</span>
         <span class="nx">order</span><span class="o">:</span><span class="mi">9</span>
       <span class="p">},</span>
@@ -13,17 +22,17 @@
         <span class="nx">reg</span><span class="o">:</span><span class="sr">/\*([1-9]\d*)/</span><span class="p">,</span>
         <span class="nx">action</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">all</span><span class="p">,</span> <span class="nx">num</span><span class="p">){</span>
           <span class="k">this</span><span class="p">.</span><span class="nx">current</span><span class="p">().</span><span class="nx">repeat</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">num</span><span class="p">)</span>
-          <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">num</span><span class="p">)</span>
         <span class="p">},</span>
         <span class="nx">order</span><span class="o">:</span><span class="mi">8</span>
+      <span class="p">}</span>
     <span class="p">})</span>
+</pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>根据data生成节点</p>             </td>             <td class="code">               <div class="highlight"><pre>
   <span class="kd">var</span> <span class="nx">createNode</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">option</span><span class="p">){</span>
     <span class="kd">var</span> <span class="nx">tag</span> <span class="o">=</span> <span class="nx">option</span><span class="p">.</span><span class="nx">tag</span><span class="p">,</span>
       <span class="nx">group</span> <span class="o">=</span> <span class="nx">option</span><span class="p">.</span><span class="nx">group</span><span class="p">,</span>
       <span class="nx">creater</span>
     <span class="k">if</span><span class="p">(</span><span class="nx">group</span><span class="p">){</span>
       <span class="nx">node</span> <span class="o">=</span>  <span class="nx">create</span><span class="p">(</span><span class="nx">group</span><span class="p">)</span>
-      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span>
     <span class="p">}</span>
     <span class="k">else</span><span class="p">{</span>
       <span class="nx">node</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">tag</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="o">?</span> <span class="s2">&quot;div&quot;</span><span class="o">:</span><span class="nx">option</span><span class="p">.</span><span class="nx">tag</span><span class="p">)</span>
@@ -43,7 +52,7 @@
     <span class="k">return</span> <span class="nx">node</span>
   <span class="p">}</span>
   <span class="kd">var</span> <span class="nx">ExpandCreater</span> <span class="o">=</span> <span class="p">{</span>
-</pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>group与tag特殊</p>             </td>             <td class="code">               <div class="highlight"><pre>
+</pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>group与tag特殊</p>             </td>             <td class="code">               <div class="highlight"><pre>
     <span class="nx">id</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="nx">id</span><span class="p">){</span>
       <span class="nx">node</span><span class="p">.</span><span class="nx">id</span> <span class="o">=</span> <span class="nx">id</span>
     <span class="p">},</span>
@@ -76,9 +85,10 @@
       <span class="k">return</span> <span class="nx">parent</span>
     <span class="p">}</span>
   <span class="p">}</span>
-</pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>API 6: 按Simple Selector生成dom节点
-<strong>注意只支持单节点</strong> :即
-如:nes.create("p#id.class1.class2")</p>             </td>             <td class="code">               <div class="highlight"><pre>
+</pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>这里是暴露的api: <strong>create</strong>
+传入选择器，生成dom节点(与一般的zen-coding生成字符串不同)
+如果顶层节点不是一个，则返回一个documentFragment
+如果是group 则进行二次create (group中有group以此类推)</p>             </td>             <td class="code">               <div class="highlight"><pre>
   <span class="kd">var</span> <span class="nx">create</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">sl</span><span class="p">){</span>
     <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">parser2</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">sl</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
       <span class="nx">len</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span>
@@ -88,14 +98,16 @@
       <span class="nx">prev</span> <span class="o">=</span> <span class="nx">current</span>
       <span class="nx">current</span> <span class="o">=</span> <span class="nx">createNode</span><span class="p">(</span><span class="nx">datum</span><span class="p">)</span>
       <span class="k">if</span><span class="p">(</span><span class="nx">i</span><span class="o">!==</span><span class="mi">0</span><span class="p">){</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">datum</span><span class="p">)</span>
         <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">comboFilter</span><span class="p">(</span><span class="nx">prev</span><span class="p">,</span> <span class="nx">current</span><span class="p">,</span> <span class="nx">data</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">combo</span><span class="p">)</span>
         <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">parent</span><span class="p">)</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">node</span>
       <span class="p">}</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="nx">parent</span>
   <span class="p">}</span>
-  <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">create</span><span class="p">(</span><span class="s2">&quot;p#id.m-home.m-name&gt;(li#name[title=haha].name1+li.name2)*2&quot;</span><span class="p">)</span>
+  <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">create</span><span class="p">(</span><span class="s2">&quot;p#id.m-hd.m-bd&gt;(li#name[tlt=ha].nm1+li.nm2)*2&quot;</span><span class="p">)</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;-----------------zen-coding输出--------------&quot;</span><span class="p">)</span>
+</pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>这里检查节点，如果信息不全，可以将这个节点</p>             </td>             <td class="code">               <div class="highlight"><pre>
   <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;-----------------zen-coding输出结束--------------&quot;</span><span class="p">)</span>
 
 </pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

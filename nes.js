@@ -116,7 +116,7 @@ function(win, doc) {
   // Parser 相关
   var
   //抽离出字匹配数目
-  ignoredRef = /\(\?\!|\(\?\:/,
+    ignoredRef = /\(\?\!|\(\?\:/,
     extractRefNum = function(regStr) {
       var left = right = 0,
         len = regStr.length,
@@ -147,31 +147,30 @@ function(win, doc) {
       }
     },
     // Object.keys 规则排序时的调用方法
-    keys = Object.keys ||
-  function(obj) {
-    var result = [];
-    for (var prop in obj) {
-      if (obj.hasOwnProperty(prop)) result.push(prop);
+    keys = Object.keys || function(obj) {
+      var result = [];
+      for (var prop in obj) {
+        if (obj.hasOwnProperty(prop)) result.push(prop);
+      }
+      return result
+    },
+    // 将规则中的reg中的macro替换掉
+    cleanRule = function(rule) {
+      var reg = rule.reg
+      //如果已经是regexp了就转为string
+      if (typeOf(reg) === "regexp") reg = reg.toString().slice(1, -1)
+      //将macro替换
+      rule.regexp = reg.replace(replaceReg, function(a, b) {
+        if (b in macros) return macros[b]
+        else throw new Error('can"t replace undefined macros:' + b)
+      })
+      return rule
+    }, cleanRules = function(rules) {
+      for (var i in rules) {
+        if (rules.hasOwnProperty(i)) cleanRule(rules[i])
+      }
+      return rules
     }
-    return result
-  },
-  // 将规则中的reg中的macro替换掉
-  cleanRule = function(rule) {
-    var reg = rule.reg
-    //如果已经是regexp了就转为string
-    if (typeOf(reg) === "regexp") reg = reg.toString().slice(1, -1)
-    //将macro替换
-    rule.regexp = reg.replace(replaceReg, function(a, b) {
-      if (b in macros) return macros[b]
-      else throw new Error('can"t replace undefined macros:' + b)
-    })
-    return rule
-  }, cleanRules = function(rules) {
-    for (var i in rules) {
-      if (rules.hasOwnProperty(i)) cleanRule(rules[i])
-    }
-    return rules
-  }
 
 
   // ##2. Parser
@@ -526,21 +525,26 @@ function(win, doc) {
   var root = doc.documentElement || doc;
   var attrMap = {
     'for': "htmlFor",
-    'class': "className",
     "href": function(node) {
       return "href" in node ? node.getAttribute("href", 2) : node.getAttribute("href")
+    },
+    "type": function(node){
+      return "type" in node ? node.getAttribute("type"):node.type
     }
   };
   var checkTagName = assert(function() {
     testNode.appendChild(doc.createComment(""));
+    // 有些版本的getElementsByTagName("*")会返回注释节点
     return !testNode.getElementsByTagName("*").length || 
     // 低版本ie下input name 或者 id为length时 length返回异常
       typeof doc.getElementsByTagName("input").length !== "number"
   });
-  var checkHasAttribute = assert(function() {
+  //form __sizzle__line200 判断getAttribute是否可信
+  var checkAttributes = assert(function() {
     testNode.innerHTML = "<select></select>";
-    testNode.lastChild.selected = 'selected'
-    return testNode.lastChild.hasAttribute ? !testNode.lastChild.hasAttribute('selected') :true;
+    var type = typeOf(testNode.lastChild.getAttribute("multiple"))
+    // IE8 returns a string for some attributes even when not present
+    return type !== "boolean" && type !== "string";
   });
   // 将nth类方法的判断部分统一抽离出来,
   // 其中type代表是否是nth-type-of类型的判断,下面类似
@@ -576,21 +580,18 @@ function(win, doc) {
       }
       return node
     };
-  // 原生hasAttribute或者其替代函数
-  var hasAttribute = checkHasAttribute?
-    function(node, key) {
-      return node.hasAttribute(key)
-    } : function(node, key) {
-      key = key.toLowerCase();
-      node = node.getAttributeNode(key);
-      return !!(node && (node.specified || node.nodeValue));
-    };
-  // 获得节点node的key属性的值
-  var getAttribute = function(node, key) {
+  // 获得节点node的key属性的值, 修改自from sizzle...蛋疼啊各浏览器的属性获取
+  var getAttribute = nes._attr = function(node, key) {
       var map = attrMap[key]
       if (map) return typeof map === "function" ? map(node) : node[map]
-      var value = node.getAttribute(key)
-      return value ? typeof node[key] === "boolean" ? node[key] ? key : null : value : null
+      if(checkAttributes){return node.getAttribute(key);}
+      var attrNode = node.getAttributeNode(key);
+      // 对于selected checked 当返回为bool值时  将其标准化为 selected = "selected"
+      // 方便后续处理
+      return typeof node[key] === "boolean" ? 
+          // 很多时候null可以作为标志位，nes中大部分特殊flag都用null标示
+          node[key] ? key : null :   
+          attrNode && attrNode.specified && attrNode.value || null
     };
   // __数组去重__
   var distinct = function(array) {
@@ -663,6 +664,12 @@ function(win, doc) {
       }
       return a ? 1 : -1;
     };
+
+  // ### nth position Cache 部分
+  // 对于nth类型的查找，有时候一次节点查找会遍历到多次相同节点，
+  // 由于一次节点查找时，由于js的单线程，节点不可能发生改变，介于此，我们将
+  // nth类的node的节点位置缓存起来，在本次查找结束后再清空
+
   // 获得node的唯一标示
   var getUid = (function(token) {
     var _uid = 0
@@ -675,72 +682,64 @@ function(win, doc) {
   //    1. isNext: 代表遍历顺序是向前还是向后
   //    2. isType: 代表是否是要指定nodeName
   var createNthFilter = function(isNext, isType) {
-      var next, prev, cacheFn, getStart
-      if (isNext) {
-        cacheFn = function(){
-          return nthPositionCache["" + (isType ? "type" : "child")]
-        }
-        next = nthNext
-        prev = nthPrev
-        getStart = nthChild
-      } else {
-        // Fixed:!!! 这里cache是首次生成的cache被写死了，即使后面clear了也没有用,
-        // 即永远无法被释放
-        cacheFn = function(){
-          nthPositionCache["last" + (isType ? "type" : "child")]
-        }
-        prev = nthNext
-        next = nthPrev
-        getStart = nthLastChild
-      }
-      // 实际返回函数, param即pesudo的action定义的参数形如
-      // `{step:1, start:1}` 所有的类似even、odd或者其他形如n、-3n-11都会标准化
-      // 成这种形势
-      return function(node, param) {
-        var cache = cacheFn()
-        if (node === root) return false // 如果是html直接返回false 坑爹啊
-        var _uid = getUid(node),
-          parent = node.parentNode,
-          traverse = param.step > 0 ? next : prev,
-          step = param.step,
-          start = param.start,
-          type = isType && node.nodeName
-          //Fixed
-        if (step === null) return false //means always false
-        if (!cache[_uid]) {
-          var startNode = getStart(parent, 1, type),
-            index = 0
-            do {
-              cache[getUid(startNode)] = ++index
-              nthPositionCache.length++
-              
-            } while (startNode = next(startNode, 1, type))
-        }
-        var position = cache[_uid]
-        if (step === 0) return position === start
-        if ((position - start) / step >= 0 && (position - start) % step == 0) {
-          return true
-        }
-      }
-    },
-    // 对于nth类型的查找，有时候一次节点查找会遍历到多次相同节点，
-    // 由于一次节点查找时，由于js的单线程，节点不可能发生改变，介于此，我们将
-    // nth类的node的节点位置缓存起来，在本次查找结束后再清空
-    clearNthPositionCache = function() {
-      if (nthPositionCache.length) {
-        nthPositionCache = {
-          child: {},
-          lastchild: {},
-          type: {},
-          lasttype: {},
-          length: 0
-        }
-      }
-    },
-    nthPositionCache = {
-      length: 1
+    var next, prev, cacheKey, getStart
+    if (isNext) {
+      cacheKey =isType ? "type" : "child"
+      next = nthNext
+      prev = nthPrev
+      getStart = nthChild
+    } else {
+      // Fixed:!!! 这里cache是首次生成的cache被写死了，即使后面clear了也没有用,
+      // 即永远无法被释放
+      cacheKey ="last" + (isType ? "type" : "child")
+      prev = nthNext
+      next = nthPrev
+      getStart = nthLastChild
     }
-
+    // 实际返回函数, param即pesudo的action定义的参数形如
+    // `{step:1, start:1}` 所有的类似even、odd或者其他形如n、-3n-11都会标准化
+    // 成这种形势
+    return function(node, param) {
+      var cache = nthPositionCache[cacheKey]
+      if (node === root) return false // 如果是html直接返回false 坑爹啊
+      var _uid = getUid(node),
+        parent = node.parentNode,
+        traverse = param.step > 0 ? next : prev,
+        step = param.step,
+        start = param.start,
+        type = isType && node.nodeName
+        //Fixed
+      if (step === null) return false //means always false
+      if (!cache[_uid]) {
+        var startNode = getStart(parent, 1, type),
+          index = 0
+          do {
+            cache[getUid(startNode)] = ++index
+            nthPositionCache.length++
+            
+          } while (startNode = next(startNode, 1, type))
+      }
+      var position = cache[_uid]
+      if (step === 0) return position === start
+      if ((position - start) / step >= 0 && (position - start) % step == 0) {
+        return true
+      }
+    }
+  }
+  var clearNthPositionCache = function() {
+    if (nthPositionCache.length) {
+      nthPositionCache.child={}
+      nthPositionCache.lastchild = {}
+      nthPositionCache.type = {}
+      nthPositionCache.lasttype = {}
+      nthPositionCache.child = {}
+      nthPositionCache.length = 0
+    }
+  }
+  var nthPositionCache = {
+    length: 1
+  }
+  // 初始化positioncache
   clearNthPositionCache()
 
 
@@ -820,10 +819,7 @@ function(win, doc) {
           filter = operatorFilters[operator]
 
         if (!operator) {
-          if (!hasAttribute(node, attribute.key)) {
-            return false
-          }
-          continue
+          return getAttribute(node, attribute.key) != null
         }
         if (!filter) throw Error("不支持的操作符:" + operator)
         if (!filter(node, attribute.key, attribute.value)) return false
@@ -875,7 +871,8 @@ function(win, doc) {
         return nodeValue.indexOf(value) === 0
       },
       "=": function(node, key, value) {
-        return getAttribute(node, key) == value
+        var nodeValue = getAttribute(node, key)
+        return nodeValue === value
       },
       "~=": function(node, key, value) {
         var nodeValue = getAttribute(node, key)
@@ -1083,7 +1080,6 @@ function(win, doc) {
           results = results.concat(getTargets(data, context))
       }
       clearNthPositionCache()
-      if(nthPositionCache.length!==0) console.log(nthPositionCache)
       if (!results.length) return results
       if (len > 1) distinct(results)
       results.sort(sortor)
@@ -1094,7 +1090,6 @@ function(win, doc) {
     // 为了测试时避免原生querySelector的影响
     // 
   var get = function(sl, context) {
-      clearNthPositionCache()
       var data = parse(sl)
       var result = find(data, context || doc)
       return result
@@ -1107,7 +1102,7 @@ function(win, doc) {
   // API1——__one__:对应标准的querySelector方法
   var one = function(sl, context) {
       var node
-      if (supportQuerySelector) {
+      if (supportQuerySelector && !nes.debug) {
         try {
           node = (context || doc).querySelector(sl)
         } catch (e) {
@@ -1124,7 +1119,7 @@ function(win, doc) {
     // 对应标准的querySelectorAll方法
   var all = function(sl, context) {
       var nodeList
-      if (supportQuerySelector) {
+      if (supportQuerySelector && !nes.debug) {
         try {
           nodeList = (context || doc).querySelectorAll(sl)
         } catch (e) {
@@ -1163,17 +1158,21 @@ function(win, doc) {
       }
     }
 
-    // ASSEMBLE 
-    // =========================
-    // 组装分为几个步骤
-    //
-    // 1. 生成pesudo 、 operator、combo 等expand方法
-    // ----------------------------------------------------------------------
-    ;
-  (function createExpand(host, beforeAssign) {
+  // ASSEMBLE 
+  // =========================
+  // 组装分为几个步骤
+  //
+  // 1. 生成pesudo 、 operator、combo 等expand方法
+  // ----------------------------------------------------------------------
+  // 具体扩展方法的使用请参见 [nes的github](https://github.com/leeluolee/nes)
+    
+  // 统一由工厂函数createExpand
+  ;(function createExpand(host, beforeAssign) {
     for (var i in host) {
       nes[i] = (function(i) {
         var container = host[i]
+        // autoSet代表了这三个函数除了key、value参数
+        // 也支持字面量的参数输入
         return autoSet(function(key, value) {
           if (!container[key]) {
             container[key] = value
@@ -1184,6 +1183,9 @@ function(win, doc) {
         })
       })(i)
     }
+  // 有些扩展如combos、operators由于为了避免冲突
+  // 关键字都写入了正则式中，这种情况下需要将新的正则式
+  // 填入相关正则，并进行parser的setup
   })(expandFilters, {
     "operators": function(key) {
       var befores = macros.operator.split("]")
@@ -1205,8 +1207,9 @@ function(win, doc) {
   extend(nes, {
     // setting stuff 设置它们的length控制缓存
     nthCache: nthCache,
-    // 是否用节点缓存节点位置,默认true
-    usePositionCache: true,
+    // 直接设置其为true 来强制不适用原生querySelector Api
+    debug:false,
+
     // parser , 抽离的parser部分
     // ---------------------------
     // 它可以:
@@ -1214,22 +1217,27 @@ function(win, doc) {
     //    2. parser.on    添加新规则
     //    3. parser.clone 复制此parser，这个作用会在后面的zen-coding的demo中体现
     //    4. parser.off   删除规则
-    parser: parser,
-    //parser
-    // 测试接口
-    parse: parse,
+    //    5. parser.cache 缓存控制
+    parser:parser,
+
+
     //解析, 这个将被移除，使用parser.parse来代替
-    find: find,
-    //查找parser解析后的data代表的节点
+    parse: parse,
+    //查找parser解析后的data代表的节点 __private__
+    _find: find,  
+
+    //测试时排除原生querySelector的影响 __deprecated__! 使用nes.debug来控制
     _get: get,
-    //测试时排除原生querySelector的影响
     //        *主要API*
     // -------------------------
     one: one,
     all: all,
     matches: matches
     // 内建扩展 api 这三个已经内建:
-    // 1.`pesudos`、2.`operators`、3.`combos`
+    // 
+    // 1. `pesudos`
+    // 2. `operators`
+    // 3. `combos`
   })
 
   //          5.Exports
