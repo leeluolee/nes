@@ -6,8 +6,8 @@
       "group": {
         reg:/\((.*)\)/,
         action:function(all, capture){
-          this.current().group = capture
           console.log(capture)
+          this.current().group = capture
         },
         order:9
       },
@@ -15,17 +15,16 @@
         reg:/\*([1-9]\d*)/,
         action:function(all, num){
           this.current().repeat = parseInt(num)
-          console.log(num)
         },
         order:8
-    })
+      }
+    });
   var createNode = function(option){
     var tag = option.tag,
       group = option.group,
       creater
     if(group){
       node =  create(group)
-      console.log(node)
     }
     else{
       node = document.createElement(tag == "*"? "div":option.tag)
@@ -37,6 +36,8 @@
     }
     if(option.repeat){//如果重复数
       var parent = document.createDocumentFragment()
+      console.log(parent)
+      console.log(node.cloneNode(true))
       for(var len = option.repeat;len--;){
         parent.appendChild(len ==0?node: node.cloneNode(true))
       }
@@ -90,12 +91,16 @@
       prev = current
       current = createNode(datum)
       if(i!==0){
-        console.log(datum)
-        var node = comboFilter(prev, current, data[i-1].combo)
-        if(!parent) parent = node
+        var node = comboFilter(prev, current, data[i-1].combo) //匹配出真正的parent节点
+        if(parent === prev) parent = node
       }
+      if(!parent) parent = current
     }
     return parent
   }
-  var node = create("p#id.m-home.m-name>(li#name[title=haha].name1+li.name2)*2")
+
+  var container = nes.one("#create")
+  var node = create("(div#container+header#id.m-home.m-name>ul>(li#name[title=haha].name1+li.name2)*2)*2")
+  // var node = create("(li#name[title=haha].name1+li.name2)*2")
   console.log(node)
+  container.appendChild(node)
