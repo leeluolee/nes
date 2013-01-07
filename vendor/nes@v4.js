@@ -12,7 +12,7 @@
   var nes = function(sl,context){return new NES(sl, context)},
     prevNes = win.nes
 
-  nes.version = "0.0.3"
+  nes.version = "0.0.4"
   var 
     // 常用属性local化
     ap = Array.prototype,

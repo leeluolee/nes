@@ -1,6 +1,7 @@
+div[class^=exa][class]
 p:not(.example:nth-child(even)) a:first-child
 div.example[class] p:nth-of-type(2n) a:last-of-type, p:nth-of-type(3n-11) a:last-child
-div ~ p ~ p ~ p a
+div ~ p ~ p ~ p a[class*=xam]
 .title ,.toc, .toc .tocline2
 div ~ p + p ~ p a:first-child
 div ~ p ~ p + p[class]
@@ -10,6 +11,18 @@ body p:first-child a[href],body div.example
 h1#title, div h1:matches(#title)
 div.example, ul .tocline2
 .tocline2, .tocline3, .tocline4
+p:nth-child(even)
+p:nth-child(2n)
+p:nth-child(5n+1)
+p:nth-child(-3n+11)
+p:nth-child(3n-11)
+p:nth-of-type(5n+1), p:nth-of-type(3n+11)
+p:nth-last-child(n-3)
+p:nth-child(-n+4)
+p:nth-child(n+1)
+p:nth-child(-3n+2)
+p:nth-child(n-3)
+p:nth-child(1)
 div.example[class] ~ p.note > strong + code.css, p.note ~ h4
 body div, div p
 div > p, div + p, div ~ p
@@ -23,25 +36,5 @@ div, p ,div[class~=example][class][class~=example]
 ul.toc li.tocline2, div[class=example]
 ul.toc > li.tocline2, div[class]
 a[href][lang][class]
-div[class^=exa]
 div[class*=e]
-div:not(.example)
-p:nth-child(even)
-p:nth-child(2n)
-p:nth-child(5n+1)
-p:nth-child(-3n+11)
-p:nth-child(3n-11)
-p:nth-of-type(5n+1), p:nth-of-type(3n-11)
-p:nth-last-child(1)
-p:nth-last-child(2)
-p:nth-last-child(3)
-p:nth-last-child(-3n+4)
-p:nth-last-child(n+1)
-p:nth-last-child(-n+2)
-p:nth-last-child(n-3)
-p:nth-child(-n+4)
-p:nth-child(n+1)
-p:nth-child(-3n+2)
-p:nth-child(n-3)
-p:nth-child(1)
-:empty
+div,div:not(.example[class])

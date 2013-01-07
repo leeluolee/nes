@@ -6,7 +6,8 @@
   // __为什么不直接添加新规则到nes.parser中?__
   // 因为例如(li.class)*2 的group或者 repeat都是
   // nes中不需要的 拖缓了速度 还增加了冲突的可能(冲突可通过order来规避，
-  // 但是负责的parse还是不建议这样来实现，应该通过手写或者bison这种成熟解析生成)
+  // 这个parser可以用来生成 命令行参数解析等简单任务
+  // 但是复杂的parse还是不建议这样来实现，应该通过手写或者bison这种成熟解析生成)
   var parser2 = nes.parser.clone()
     // 其中pesudos,分隔符也是不需要
     .off(["pesudos","split"])
@@ -91,6 +92,7 @@
   // 如果顶层节点不是一个，则返回一个documentFragment
   // 如果是group 则进行二次create (group中有group以此类推)
   var create = function(sl){
+    sl = sl.replace(/\s+/,"")
     var data = parser2.parse(sl)[0],
       len = data.length,
       datum, parent, current, prev
@@ -106,9 +108,11 @@
     }
     return parent
   }
-  var node = create("p>div#cnt+header#id.m-hd.m-md>ul>(li#nm[rel=hah].name1+li.nm2)*21")
-  console.log("-----------------zen-coding输出--------------")
-  // 这里检查节点，如果信息不全，可以将这个节点
-  nes.one("body").appendChild(node)
-  console.log(node)
-  console.log("-----------------zen-coding输出结束--------------")
+  var node = create("p>div#cnt+header#id.m-hd.m-md>ul>(li#nm[rel=hah].name1+li.nm2*5)*10")
+  if(console&&console.log){
+    console.log("-----------------zen-coding输出--------------")
+    // 这里检查节点，如果信息不全，可以将这个节点
+    nes.one("body").appendChild(node)
+    console.log(node)
+    console.log("-----------------zen-coding输出结束--------------")
+  }

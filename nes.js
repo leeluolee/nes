@@ -1,12 +1,12 @@
 !
 function(win, doc) {
   // __nes命名空间__
-  var nes = {},
-    prevNes = win.nes
+  var nes = {version: "0.0.5"},
+    locals = {} //存放local属性...被global坑死了
 
-  var
+
   // 常用属性local化
-  ap = Array.prototype,
+  var ap = Array.prototype,
     op = Object.prototype,
     sp = String.prototype,
     fp = Function.prototype,
@@ -91,13 +91,11 @@ function(win, doc) {
   // 扩展ES5 Native支持的函数，坑爹的远古浏览器
   //es5 trim
   var trimReg = /^\s+|\s+$/g
-  sp.trim = sp.trim ||
-  function() {
+  sp.trim = sp.trim || function() {
     return this.replace(trimReg, "")
   }
   //es5 bind
-  fp.bind = fp.bind ||
-  function(context, args) {
+  fp.bind = fp.bind || function(context, args) {
     args = slice.call(arguments, 1);
     var fn = this;
     return function() {
@@ -138,14 +136,14 @@ function(win, doc) {
         return "\\" + (parseInt(b) + curIndex)
       })
     },
-    // 生成默认的action，这个会将匹配到的参数推入一个同名的数组内
-    createAction = function(name) {
-      return function(all) {
-        var parsed = this.parsed,
-          current = parsed[name] || (parsed[name] = [])
-          current.push(slice.call(arguments))
-      }
-    },
+    // // 生成默认的action，这个会将匹配到的参数推入一个同名的数组内
+    // createAction = function(name) {
+    //   return function(all) {
+    //     var parsed = this.parsed,
+    //       current = parsed[name] || (parsed[name] = [])
+    //       current.push(slice.call(arguments))
+    //   }
+    // },
     // Object.keys 规则排序时的调用方法
     keys = Object.keys || function(obj) {
       var result = [];
@@ -165,7 +163,8 @@ function(win, doc) {
         else throw new Error('can"t replace undefined macros:' + b)
       })
       return rule
-    }, cleanRules = function(rules) {
+    }, 
+    cleanRules = function(rules) {
       for (var i in rules) {
         if (rules.hasOwnProperty(i)) cleanRule(rules[i])
       }
@@ -179,16 +178,14 @@ function(win, doc) {
   // 事实上这个简单Parser还帮我实现了命令行参数解析，
   // zen-coding的实现等等, 它可以帮助实现基于正则式的
   // 字符串解析
-  var Parser = function(opts) {
+  function Parser(opts) {
       opts = opts || {}
       if (opts.macros) this._macros = opts.macros
       this._links = {} //symbol link map
       this._rules = {} //symbol def
       this.TRUNK = null
       this.cache = createCache(opts.maxCache || 200)
-      this.cache.set("", [
-        []
-      ]) //输入空字符串返回空数组
+      this.cache.set("", [[]]) //输入空字符串返回空数组
     }
 
   extend(Parser.prototype, {
@@ -281,11 +278,9 @@ function(win, doc) {
         args = slice.call(arguments)
 
         for (var i in links) {
-          var
-          link = links[i],
-            retain = link[1]
-
-          var index = parseInt(link[0])
+          var link = links[i],
+            retain = link[1],
+            index = parseInt(link[0])
           if (args[index] && (rule = rules[i])) {
             rule.action.apply(this, args.slice(index, index + retain))
             return ""
@@ -310,7 +305,11 @@ function(win, doc) {
         var i = ruleNames[len],
           rule = rules[i],
           retain = extractRefNum(rule.regexp) + 1 // 1就是那个all
-        if (!rule.action) rule.action = createAction(i) // 创建一个action
+        if(rule.filter && !filters[i]){ 
+          filters[i] = rule.filter
+          console.log(i)
+          } //将filter转移到filters下
+
         links[i] = [curIndex, retain] //分别是rule名，参数数量
         var regexp = extractRefIndex(rule.regexp, curIndex - 1);
         curIndex += retain;
@@ -326,7 +325,7 @@ function(win, doc) {
   // ### parse的规则定义部分开始
   // 一些用到的正则式，但是又不属于parser的规则组成
   var
-  replaceReg = /\{\{([^\}]*)\}\}/g,
+    replaceReg = /\{\{([^\}]*)\}\}/g,
     //替换rule中的macro
     nthValueReg = /^(?:(\d+)|([+-]?\d*)?n([+-]\d+)?)$/,
     // nth伪类的value规则
@@ -401,16 +400,16 @@ function(win, doc) {
     // 第二个原因就是: __效率__  一次大型正则的调用时间要远低于多次小型正则的匹配(前提它们做同样规模的匹配)
   var
   // 一些macro
-  macros = {
-    split: "\\s*,\\s*",
-    // 分隔符
-    operator: "[*^$|~!]?=",
-    // 属性操作符 如= 、!=
-    combo: "[>\\s+~](?!=)",
-    // 连接符 如 > ~ 
-    // 中文unicode范围http://baike.baidu.com/view/40801.htm#sub40801_3
-    word: "[\\\\\\w\\u4e00-\\u9fbf-]"
-  },
+    macros = {
+      split: "\\s*,\\s*",
+      // 分隔符
+      operator: "[*^$|~!]?=",
+      // 属性操作符 如= 、!=
+      combo: "[>\\s+~](?!=)",
+      // 连接符 如 > ~ 
+      // 中文unicode范围http://baike.baidu.com/view/40801.htm#sub40801_3
+      word: "[\\\\\\w\\u4e00-\\u9fbf-]"
+    },
     // 语法规则定义
     rules = {
       split: {
@@ -501,8 +500,7 @@ function(win, doc) {
       }
     }
 
-  var
-  cleanReg = new RegExp("\\s*(,|" + macros.combo + "|" + macros.operator + ")\\s*", "g")
+  var cleanReg = new RegExp("\\s*(,|" + macros.combo + "|" + macros.operator + ")\\s*", "g")
   clean = function(sl) {
       return sl.trim().replace(/\s+/g, " ").replace(cleanReg, "$1")
     }
@@ -511,7 +509,7 @@ function(win, doc) {
   var parser = new Parser()
   parser.on(rules) //生成规则
   // 为了兼容前面版本，仍然提供这个parse函数, 也为了与find想对应
-  var parse = function(sl) {
+  function parse(sl) {
       return parser.parse(sl)
     }
 
@@ -548,40 +546,40 @@ function(win, doc) {
   });
   // 将nth类方法的判断部分统一抽离出来,
   // 其中type代表是否是nth-type-of类型的判断,下面类似
-  var checkNth = function(node, type) {
+  function checkNth(node, type) {
       if (type) return node.nodeName === type
       else return node.nodeType === 1
     }
     // 获得父节点node的顺数第n(从1开始)个子节点
-  var nthChild = function(node, n, type) {
+  function nthChild(node, n, type) {
       var node = node.firstChild
       if (!node) return
       if (checkNth(node, type)) n--
       return nthNext(node, n, type)
     };
   // 获得父节点node的倒数第n(从1开始)个子节点
-  var nthLastChild = function(node, n, type) {
+  function nthLastChild(node, n, type) {
       var node = node.lastChild
       if (!node) return
       if (checkNth(node, type)) n--
       return nthPrev(node, n, type)
     };
   // 获得节点node的第n(从1开始)个前置兄弟节点
-  var nthPrev = function(node, n, type) {
+  function nthPrev(node, n, type) {
       while (n && (node = node.previousSibling)) {
         if (checkNth(node, type)) n--
       }
       return node
     };
   // 获得节点node的倒数第n(从1开始)个前置兄弟节点
-  var nthNext = function(node, n, type) {
+  function nthNext(node, n, type) {
       while (n && (node = node.nextSibling)) {
         if (checkNth(node, type)) n--
       }
       return node
     };
   // 获得节点node的key属性的值, 修改自from sizzle...蛋疼啊各浏览器的属性获取
-  var getAttribute = nes._attr = function(node, key) {
+  function getAttribute(node, key) {
       var map = attrMap[key]
       if (map) return typeof map === "function" ? map(node) : node[map]
       if(checkAttributes){return node.getAttribute(key);}
@@ -594,7 +592,7 @@ function(win, doc) {
           attrNode && attrNode.specified && attrNode.value || null
     };
   // __数组去重__
-  var distinct = function(array) {
+  function distinct(array) {
       for (var i = array.length; i--;) {
         var n = array[i]
         // 先排除 即 如果它是清白的 后面就没有等值元素
@@ -610,49 +608,49 @@ function(win, doc) {
     // 从sizzle抄袭的 document sorter 
     // 将匹配元素集按文档顺序排列好 这很重要!
   var sortor = (doc.compareDocumentPosition) ?
-  function(a, b) {
-    if (!a.compareDocumentPosition || !b.compareDocumentPosition) return 0;
-    return a.compareDocumentPosition(b) & 4 ? -1 : a === b ? 0 : 1;
-  } : ('sourceIndex' in doc) ?
-  function(a, b) {
-    if (!a.sourceIndex || !b.sourceIndex) return 0;
-    return a.sourceIndex - b.sourceIndex;
-  } : function(a, b) {
-    var i = 0,
-      ap = [a],
-      bp = [b],
-      aup = a.parentNode,
-      bup = b.parentNode,
-      cur = aup;
+    function(a, b) {
+      if (!a.compareDocumentPosition || !b.compareDocumentPosition) return 0;
+      return a.compareDocumentPosition(b) & 4 ? -1 : a === b ? 0 : 1;
+    } : ('sourceIndex' in doc) ?
+    function(a, b) {
+      if (!a.sourceIndex || !b.sourceIndex) return 0;
+      return a.sourceIndex - b.sourceIndex;
+    } : function(a, b) {
+      var i = 0,
+        ap = [a],
+        bp = [b],
+        aup = a.parentNode,
+        bup = b.parentNode,
+        cur = aup;
 
-    if (a === doc) {
-      return -1;
-    } else if (b === doc) {
-      return 1;
-    } else if (!aup && !bup) {
-      return 0;
-    } else if (!bup) {
-      return -1;
-    } else if (!aup) {
-      return 1;
-    } else if (aup === bup) {
-      return siblingCheck(a, b);
-    }
-    while (cur) {
-      ap.unshift(cur);
-      cur = cur.parentNode;
-    }
-    cur = bup;
-    while (cur) {
-      bp.unshift(cur);
-      cur = cur.parentNode;
-    }
-    while (ap[i] === bp[i]) {
-      i++;
-    }
-    return siblingCheck(ap[i], bp[i]);
-  };
-  var siblingCheck = function(a, b) {
+      if (a === doc) {
+        return -1;
+      } else if (b === doc) {
+        return 1;
+      } else if (!aup && !bup) {
+        return 0;
+      } else if (!bup) {
+        return -1;
+      } else if (!aup) {
+        return 1;
+      } else if (aup === bup) {
+        return siblingCheck(a, b);
+      }
+      while (cur) {
+        ap.unshift(cur);
+        cur = cur.parentNode;
+      }
+      cur = bup;
+      while (cur) {
+        bp.unshift(cur);
+        cur = cur.parentNode;
+      }
+      while (ap[i] === bp[i]) {
+        i++;
+      }
+      return siblingCheck(ap[i], bp[i]);
+    };
+  function siblingCheck(a, b) {
       if (a && b) {
         var cur = a.nextSibling;
         while (cur) {
@@ -681,7 +679,7 @@ function(win, doc) {
   // 参数有两个  
   //    1. isNext: 代表遍历顺序是向前还是向后
   //    2. isType: 代表是否是要指定nodeName
-  var createNthFilter = function(isNext, isType) {
+  function createNthFilter(isNext, isType) {
     var next, prev, cacheKey, getStart
     if (isNext) {
       cacheKey =isType ? "type" : "child"
@@ -726,18 +724,19 @@ function(win, doc) {
       }
     }
   }
-  var clearNthPositionCache = function() {
-    if (nthPositionCache.length) {
-      nthPositionCache.child={}
-      nthPositionCache.lastchild = {}
-      nthPositionCache.type = {}
-      nthPositionCache.lasttype = {}
-      nthPositionCache.child = {}
-      nthPositionCache.length = 0
-    }
-  }
   var nthPositionCache = {
     length: 1
+  }
+  function clearNthPositionCache() {
+    if(nthPositionCache.length){
+      nthPositionCache = {
+        child:{},
+        lastchild:{},
+        type:{},
+        lasttype:{},
+        length:0
+      }
+    } 
   }
   // 初始化positioncache
   clearNthPositionCache()
@@ -816,13 +815,16 @@ function(win, doc) {
       for (; len--;) {
         var attribute = attributes[len],
           operator = attribute["operator"],
-          filter = operatorFilters[operator]
+          filter = operatorFilters[operator],
+          nodeValue = getAttribute(node, attribute.key)
 
-        if (!operator) {
-          return getAttribute(node, attribute.key) != null
+        if(nodeValue === null){
+          if(operator !== "!=" ) return false
+          continue
         }
+        if(!operator) continue
         if (!filter) throw Error("不支持的操作符:" + operator)
-        if (!filter(node, attribute.key, attribute.value)) return false
+        if (!filter(attribute.value, nodeValue+"")) return false
       }
       return true
     }
@@ -865,40 +867,28 @@ function(win, doc) {
     },
     // __扩展操作符__ :
     operators: {
-      "^=": function(node, key, value) {
-        var nodeValue = getAttribute(node, key)
+      "^=": function(value, nodeValue) {
         if (nodeValue == null) return false
         return nodeValue.indexOf(value) === 0
       },
-      "=": function(node, key, value) {
-        var nodeValue = getAttribute(node, key)
+      "=": function(value, nodeValue) {
         return nodeValue === value
       },
-      "~=": function(node, key, value) {
-        var nodeValue = getAttribute(node, key)
+      "~=": function(value, nodeValue) {
         if (nodeValue == null) return false
-
-        var values = nodeValue.split(/\s+/),
-          len = values.length
-
-        for (; len--;) {
-          if (values[len] == value) return true
-        }
-        return false
+        return ~(" " + nodeValue + " ").indexOf(value)
       },
-      "$=": function(node, key, value) {
-        var realValue = getAttribute(node, key)
-        return value && typeof realValue == "string" && realValue.substr(realValue.length - value.length) === value
+      "$=": function(value, nodeValue) { //以value结尾
+        return nodeValue.substr(nodeValue.length - value.length) === value
       },
-      "|=": function(node, key, value) {
-        var realValue = getAttribute(node, key) || ""
-        return ~ ("-" + realValue + "-").indexOf("-" + value + "-")
+      "|=": function(value, nodeValue) { // 连接符
+        return ~("-" + nodeValue + "-").indexOf("-" + value + "-")
       },
-      "*=": function(node, key, value) {
-        return ~ (getAttribute(node, key) || " ").indexOf(value)
+      "*=": function(value, nodeValue) { //出现在nodeValue的任意位置
+        return ~(nodeValue).indexOf(value)
       },
-      "!=": function(node, key, value) {
-        return getAttribute(node, key) !== value
+      "!=": function(value, nodeValue) {
+        return nodeValue !== value
       }
     },
     // __扩展伪类__:
@@ -916,8 +906,7 @@ function(win, doc) {
       "nth-of-type": createNthFilter(1, 1),
       "nth-last-of-type": createNthFilter(0, 1),
       "nth-match": function(node, param) {
-        var
-        tmp = param.split(/\s+of\s+/),
+        var tmp = param.split(/\s+of\s+/),
           nth = parseInt(tmp[0]),
           sl = tmp[1],
           start = node.parentNode.firstChild
@@ -984,7 +973,7 @@ function(win, doc) {
     }
   }
   // 这里主要是整合之前的ExpandsFilter中的mathch, 单层数据
-  var matchDatum = function(node, datum, ignored) {
+  function matchDatum(node, datum, ignored) {
       var subFilter
       for (var i in datum) {
         if (ignored !== i && (subFilter = filters[i]) && !subFilter(node, datum[i])) {
@@ -996,15 +985,14 @@ function(win, doc) {
   // 这个全局cache的引入是为了避免多次传入参数。
   // 当然全局的缺点也很明显，维护会不方便, 不利于测试
   var matchesCache = null; //保存那些matches函数
-  var matchData = function(node, data, ignored) { // 稍后再看存入step
+  function matchData(node, data, ignored) { // 稍后再看存入step
       var len = data.length,
         datum = data[len - 1]
         // 首先要满足自身
       if (!matchDatum(node, datum, ignored)) return false
       else {
         if (len == 1) return true
-        var
-        nextDatum = data[len - 2],
+        var nextDatum = data[len - 2],
           getNext = expandFilters.combos[nextDatum.combo],
           match = matchesCache[len - 2],
           next = getNext(node, match)
@@ -1014,13 +1002,13 @@ function(win, doc) {
       }
     };
   //动态产生供FilterOneNode使用的match
-  var createMatch = function(data) {
+  function createMatch(data) {
       return function(node) {
         if (node == root || node == null || node == doc) return null //null 相当于休止符
         return matchData(node, data)
       }
     };
-  var createMatches = function(data) {
+  function createMatches(data) {
       var matches = []
       for (var i = 0, len = data.length; i < len; i++) {
         matches.push(createMatch(data.slice(0, i + 1)))
@@ -1030,8 +1018,8 @@ function(win, doc) {
   // 过滤主函数filter
   // -----------------------------------
   // 自底向上过滤非匹配节点
-  var filter = function(results, data, ignored) {
-      if (!data.length) return results
+  function filter(results, data, ignored) {
+      if (!data.length) return results;
       //这里是为了缓存match匹配函数
       var preMatchesCache = matchesCache
       matchesCache = createMatches(data)
@@ -1041,24 +1029,24 @@ function(win, doc) {
         }
       }
       // Fixed: 因为一次filter可能会有字filter调用，比如matches、not、include
-      matchesCache = preMatchesCache // warning :以后写全局变量一定当心
-      return results
+      matchesCache = preMatchesCache; // warning :以后写全局变量一定当心
+      return results;
     }
     // 获得第一次目标节点集
-  var getTargets = function(data, context) {
+  function getTargets(data, context) {
       var results, ignored, lastPiece = data[data.length - 1]
       if (lastPiece.id) {
-        results = finders.byId(lastPiece.id)
-        ignored = "id"
+        results = finders.byId(lastPiece.id);
+        ignored = "id";
       } else if (lastPiece.classList && lastPiece.classList.length && finders.byClassName) {
-        results = finders.byClassName(lastPiece.classList, context)
-        ignored = "classList"
+        results = finders.byClassName(lastPiece.classList, context);
+        ignored = "classList";
       } else {
-        results = finders.byTagName(lastPiece.tag || "*", context)
-        ignored = "tag"
+        results = finders.byTagName(lastPiece.tag || "*", context);
+        ignored = "tag";
       }
-      if (!results.length) return results
-      return filter(results, data, ignored)
+      if (!results.length) return results;
+      return filter(results, data, ignored);
     }
     // API : find (private)
     // -------------
@@ -1070,7 +1058,7 @@ function(win, doc) {
     //     datas : [data,data]   
     //     data : [datum, datum]
     //     datum: {tag:"*"....etc}
-  var find = function(datas, context) {
+  function find(datas, context) {
       if (!datas[0][0]) return []
       var results = []
       for (var i = 0, len = datas.length; i < len; i++) {
@@ -1081,18 +1069,20 @@ function(win, doc) {
       }
       clearNthPositionCache()
       if (!results.length) return results
-      if (len > 1) distinct(results)
-      results.sort(sortor)
+      if (len > 1){
+        distinct(results)
+        results.sort(sortor)
+      }
       return results
     }
     // API : 测试用get相当于all (private)
     // -------------------------------------
     // 为了测试时避免原生querySelector的影响
     // 
-  var get = function(sl, context) {
-      var data = parse(sl)
-      var result = find(data, context || doc)
-      return result
+  function get(sl, context) {
+      var data = parse(sl);
+      var result = find(data, context || doc);
+      return result;
     }
 
     // API 
@@ -1100,16 +1090,16 @@ function(win, doc) {
   var supportQuerySelector = !! doc.querySelector
 
   // API1——__one__:对应标准的querySelector方法
-  var one = function(sl, context) {
+  function one(sl, context) {
       var node
       if (supportQuerySelector && !nes.debug) {
         try {
-          node = (context || doc).querySelector(sl)
+          node = (context || doc).querySelector(sl);
         } catch (e) {
-          node = get(sl, context)[0]
+          node = get(sl, context)[0];
         }
       } else {
-        node = get(sl, context)[0]
+        node = get(sl, context)[0];
       }
       return node
     }
@@ -1117,16 +1107,16 @@ function(win, doc) {
     // API2——__all__
     // -------------------------------
     // 对应标准的querySelectorAll方法
-  var all = function(sl, context) {
+  function all(sl, context) {
       var nodeList
       if (supportQuerySelector && !nes.debug) {
         try {
-          nodeList = (context || doc).querySelectorAll(sl)
+          nodeList = (context || doc).querySelectorAll(sl);
         } catch (e) {
-          nodeList = get(sl, context)
+          nodeList = get(sl, context);
         }
       } else {
-        nodeList = get(sl, context)
+        nodeList = get(sl, context);
       }
       return nodeList
     }
@@ -1138,9 +1128,9 @@ function(win, doc) {
     // 即与all、one函数的支持是一样的
     //
     // 注: 由于:not与:matches依赖于这个函数 ,所以同样支持复杂选择器
-  var matches = function(node, sl) {
-      var datas = parse(sl)
-      len = datas.length
+  function matches(node, sl) {
+      var datas = parse(sl),
+        len = datas.length
       if (!datas[len - 1][0]) return false
       for (; len--;) {
         if (matchOneData(node, datas[len])) return true
@@ -1149,7 +1139,7 @@ function(win, doc) {
     }
 
     // matches 单步调用方法
-  var matchOneData = function(node, data) {
+  function matchOneData(node, data) {
       var len = data.length
       if (!matchDatum(node, data[len - 1])) {
         return false
@@ -1170,15 +1160,14 @@ function(win, doc) {
   ;(function createExpand(host, beforeAssign) {
     for (var i in host) {
       nes[i] = (function(i) {
-        var container = host[i]
+        var container = host[i];
         // autoSet代表了这三个函数除了key、value参数
         // 也支持字面量的参数输入
         return autoSet(function(key, value) {
-          if (!container[key]) {
-            container[key] = value
-            if (i in beforeAssign) {
-              beforeAssign[i](key, value)
-            }
+          // Warning: 直接覆盖，如果存在的话
+          container[key] = value.bind(container);
+          if (i in beforeAssign) {
+            beforeAssign[i](key, value);
           }
         })
       })(i)
@@ -1187,17 +1176,17 @@ function(win, doc) {
   // 关键字都写入了正则式中，这种情况下需要将新的正则式
   // 填入相关正则，并进行parser的setup
   })(expandFilters, {
-    "operators": function(key) {
-      var befores = macros.operator.split("]")
-      befores.splice(1, 0, key.charAt(0) + "]")
-      macros.operator = befores.join("")
-      parser.setup()
+    "operators": function(key, value) {
+      var befores = macros.operator.split("]");
+      befores.splice(1, 0, key.charAt(0) + "]");
+      macros.operator = befores.join("");
+      parser.setup();
     },
-    "combos": function(key) {
-      var befores = macros.combo.split("]")
-      befores.splice(1, 0, key + "]")
-      macros.combo = befores.join("")
-      parser.setup()
+    "combos": function(key, value) {
+      var befores = macros.combo.split("]");
+      befores.splice(1, 0, key + "]");
+      macros.combo = befores.join("");
+      parser.setup();
     }
   })
 
@@ -1205,11 +1194,8 @@ function(win, doc) {
   // -------------------------------------
   //
   extend(nes, {
-    // setting stuff 设置它们的length控制缓存
-    nthCache: nthCache,
     // 直接设置其为true 来强制不适用原生querySelector Api
     debug:false,
-
     // parser , 抽离的parser部分
     // ---------------------------
     // 它可以:
@@ -1220,12 +1206,10 @@ function(win, doc) {
     //    5. parser.cache 缓存控制
     parser:parser,
 
-
     //解析, 这个将被移除，使用parser.parse来代替
     parse: parse,
     //查找parser解析后的data代表的节点 __private__
     _find: find,  
-
     //测试时排除原生querySelector的影响 __deprecated__! 使用nes.debug来控制
     _get: get,
     //        *主要API*
@@ -1245,18 +1229,12 @@ function(win, doc) {
   // 暴露API:  amd || commonjs  || global 
   // 支持commonjs
   if (typeof exports === 'object') {
-    module.exports = nes
+    module.exports = nes;
     // 支持amd
   } else if (typeof define === 'function' && define.amd) {
-    define(function() {
-      return nes
-    })
+    define(function() {return nes });
   } else {
     // 直接暴露到全局
-    win.nes = nes
-    nes.noConflict = function(name) {
-      win[name] = nes;
-      win.nes = prevNes
-    }
+    win.nes = nes;
   }
 }(window, document)

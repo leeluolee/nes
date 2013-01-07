@@ -19,7 +19,8 @@ var sls = [
 "ul.test1 > li{,10}",//从第一个到最后一个
 "ul.test1 > li:nth-child(n+1):not(:nth-last-child(n+11))", // 相当于上一条
 "ul.test1 > li{1,-2}", //从第一个到倒数第二个，不包括
-"ul.test1 > li:nth-child(n+1):nth-last-child(n+2)" // 相当于上一条
+"ul.test1 > li:nth-child(n+1):nth-last-child(n+2)", // 相当于上一条
+"li::hello"
 ]
 
 var log = new _$log(document.getElementById("info"))

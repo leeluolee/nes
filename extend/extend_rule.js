@@ -34,8 +34,11 @@ nes.parser.on("range",{
 // 以后可能可以实现
 nes.parser.on("pesudoElement",{
   reg: /::(\w+)/,
-  filter:function(node,args){
-    console.log(args[1])
+  action:function(all, name){
+    this.current().pesudoElement = name
+  },
+  filter:function(node, args){
+    // 我们随机返回是否通过
     return Math.random()>0.5
   }
 })
