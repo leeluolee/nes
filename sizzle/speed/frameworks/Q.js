@@ -1,3 +1,4 @@
+
 var Q = (function (){
     var d = document;
     d._Q_rev = 0;
@@ -116,9 +117,9 @@ var Q = (function (){
         var k = seq.length;
         while (k --) {
             var simple = seq[k];
-            // è½¬åŒ–[id="xxx"][name="xxx"][tagName="xxx"][className~="xxx"]ä¹‹ç±»çš„é€‰æ‹©å™¨
-            // è¯†åˆ«:root,html|head|body|titleç­‰å…¨å±€ä»…ä¸€ä¸ªçš„æ ‡ç­¾çš„é€‰æ‹©å™¨ï¼Œå¿½ç•¥*é€‰æ‹©å™¨
-            // åˆå¹¶ç±»é€‰æ‹©å™¨ä»¥ä¾¿äºä½¿ç”¨getElementsByClassName
+            // ×ª»¯[id="xxx"][name="xxx"][tagName="xxx"][className~="xxx"]Ö®ÀàµÄÑ¡ÔñÆ÷
+            // Ê¶±ğ:root,html|head|body|titleµÈÈ«¾Ö½öÒ»¸öµÄ±êÇ©µÄÑ¡ÔñÆ÷£¬ºöÂÔ*Ñ¡ÔñÆ÷
+            // ºÏ²¢ÀàÑ¡ÔñÆ÷ÒÔ±ãÓÚÊ¹ÓÃgetElementsByClassName
             if (simple.kind == ':html') simple = make('T', 'html');
             if (simple.kind == '=') {
                 if (efMap[simple[0]]) simple = make(efMap[simple[0]], [simple[1]]);
@@ -135,7 +136,7 @@ var Q = (function (){
             if (simple.kind == ':not' && !((t=simple[0],t.length==1)&&(t=t[0],t.length==1))) {
                 simple.kind = ':not-ex';
             }
-            //remark: è¿™é‡Œæ˜¯ä¸ºäº†æ”¯æŒsizzleçš„setFilterç³»åˆ—
+            //remark: ÕâÀïÊÇÎªÁËÖ§³ÖsizzleµÄsetFilterÏµÁĞ
             if (regPos.test(simple.kind)) {
                 simple[0] = Number(simple[0]) | 0;
                 var newSimple = make(simple.kind, simple.slice(0));
@@ -146,20 +147,20 @@ var Q = (function (){
                     seq.allPoses.push(newSimple);
                 }
             }
-            // è®¡ç®—é€‰æ‹©å™¨çš„å¾—åˆ†ç”¨äºä¼˜å…ˆçº§æ’åºç­‰ç­–ç•¥
+            // ¼ÆËãÑ¡ÔñÆ÷µÄµÃ·ÖÓÃÓÚÓÅÏÈ¼¶ÅÅĞòµÈ²ßÂÔ
             simple.fR = fRMap[simple.kind] | 0;
             simple.tR = tRMap[simple.kind] | 0;
             if (simple.fR && (!finder || simple.fR > finder.fR)) finder = simple;
             seq[k] = simple;
         }
-        // æŒ‰ç…§ä¼˜å…ˆçº§å¯¹ç”¨äºæµ‹è¯•çš„é€‰æ‹©å™¨è¿›è¡Œæ’åº
+        // °´ÕÕÓÅÏÈ¼¶¶ÔÓÃÓÚ²âÊÔµÄÑ¡ÔñÆ÷½øĞĞÅÅĞò
         seq.sort(testingOrder);
-        // è®°å½•ç”¨äºgetElementXXXçš„æœ€ä½³çš„é€‰æ‹©å™¨
+        // ¼ÇÂ¼ÓÃÓÚgetElementXXXµÄ×î¼ÑµÄÑ¡ÔñÆ÷
         seq.$ = finder;
         return seq;
     }
-    // å¯¹chainè¿›è¡Œå¤„ç†
-    // æ³¨æ„ä¸ºäº†å¤„ç†æ–¹ä¾¿, è¿”å›çš„æ•°ç»„æ˜¯å€’åºçš„
+    // ¶Ôchain½øĞĞ´¦Àí
+    // ×¢ÒâÎªÁË´¦Àí·½±ã, ·µ»ØµÄÊı×éÊÇµ¹ĞòµÄ
     // div p a => [div] [p] [a]
     // div p>a => [div] [p>a]
     function slice(chain){
@@ -170,7 +171,7 @@ var Q = (function (){
             var seq = chain[k];
             seq = process(seq);
             seq.N = 'node' + k;
-            //remark: è¿™é‡Œæ˜¯ä¸ºäº†æ”¯æŒsizzleçš„setFilter.
+            //remark: ÕâÀïÊÇÎªÁËÖ§³ÖsizzleµÄsetFilter.
             if (seq.allPoses) {
                 if (!chain.allPoses) {
                     chain.allPoses = [];
@@ -202,13 +203,13 @@ var Q = (function (){
             } else {
                 part.R = 'root';
                 part.isFirst = true;
-//                // å¦‚æœå±äºQ("~ span._result", el)è¿™ç§æƒ…å†µ
+//                // Èç¹ûÊôÓÚQ("~ span._result", el)ÕâÖÖÇé¿ö
 //                if (part[part.length - 1].comb !== ' ') {
 //                    part.fI = part.length - 1;
 //                }
             }
         }
-        // å¦‚æœæ²¡æœ‰æ‰¾åˆ°ä»»ä½•ä¸€ä¸ªå¯ä»¥ç”¨äºfindçš„seq.
+        // Èç¹ûÃ»ÓĞÕÒµ½ÈÎºÎÒ»¸ö¿ÉÒÔÓÃÓÚfindµÄseq.
         if (parts[0].fI == null) {
             parts[0].fI = 0;
             parts[0][0].$ = make('*', ['*']);
@@ -287,7 +288,7 @@ var Q = (function (){
         ':checked': '#{N}.checked===true',
         ':selected': '(#{N}.parentNode.selectedIndex,#{N}.selected===true)',
         
-        // TODO: è¿™äº›ä¼ªç±»å¯ä»¥è½¬åŒ–æˆä¸ºæ ‡ç­¾é€‰æ‹©å™¨åŠ ä»¥ä¼˜åŒ–ï¼
+        // TODO: ÕâĞ©Î±Àà¿ÉÒÔ×ª»¯³ÉÎª±êÇ©Ñ¡ÔñÆ÷¼ÓÒÔÓÅ»¯£¡
         ':focus': TPL_DOC + '#{N}===doc.activeElement',
         ':button': TPL_INPUT_T + '#{N}.nodeName==="button"||(#{N}.nodeName===input_t&&#{N}.type==="button")',
         ':submit': TPL_INPUT_T + '#{N}.nodeName===input_t&&#{N}.type==="submit"',
@@ -372,7 +373,7 @@ var Q = (function (){
             var finder = seq.$;
             if (finder) {
                 tpl = TPL_FIND[finder.kind];
-                // æœ‰hackçš„å«Œç–‘, è®©äº§ç”Ÿtestä»£ç æ—¶å¿½ç•¥å·²ç»ç”¨äºfindçš„seq.
+                // ÓĞhackµÄÏÓÒÉ, ÈÃ²úÉútest´úÂëÊ±ºöÂÔÒÑ¾­ÓÃÓÚfindµÄseq.
                 finder.kind = '*';
             } else {
                 tpl = TPL_FIND['*'];
@@ -599,12 +600,12 @@ var Q = (function (){
     function query(expr, root){
         var doc = root.ownerDocument || root;
         var ret;
-        if (!doc.getElementById) {
-            return queryXML(expr, root);
-        }
-        if (root === doc && doc.querySelectorAll && !/#/.test(expr)) {
-            try { return Q._toArray(doc.querySelectorAll(expr)); } catch(ex){}
-        }
+        // if (!doc.getElementById) {
+        //     return queryXML(expr, root);
+        // }
+        // if (root === doc && doc.querySelectorAll && !/#/.test(expr)) {
+        //     try { return Q._toArray(doc.querySelectorAll(expr)); } catch(ex){}
+        // }
         var fn  = cache[expr] || (cache[expr] = compile(expr));
         if (!inQuery) {
             inQuery = true;

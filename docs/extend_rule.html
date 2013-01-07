@@ -34,11 +34,14 @@ action与filter至少需要需要二选其一(根据场景不同)才能完成一
 以后可能可以实现</p>             </td>             <td class="code">               <div class="highlight"><pre>
 <span class="nx">nes</span><span class="p">.</span><span class="nx">parser</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;pesudoElement&quot;</span><span class="p">,{</span>
   <span class="nx">reg</span><span class="o">:</span> <span class="sr">/::(\w+)/</span><span class="p">,</span>
-  <span class="nx">filter</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span><span class="nx">args</span><span class="p">){</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+  <span class="nx">action</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">all</span><span class="p">,</span> <span class="nx">name</span><span class="p">){</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">current</span><span class="p">().</span><span class="nx">pesudoElement</span> <span class="o">=</span> <span class="nx">name</span>
+  <span class="p">},</span>
+  <span class="nx">filter</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">node</span><span class="p">,</span> <span class="nx">args</span><span class="p">){</span>
+</pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>我们随机返回是否通过</p>             </td>             <td class="code">               <div class="highlight"><pre>
     <span class="k">return</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span><span class="o">&gt;</span><span class="mf">0.5</span>
   <span class="p">}</span>
 <span class="p">})</span>
-</pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>你也两个都写</p>             </td>             <td class="code">               <div class="highlight"><pre>
+</pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>你也两个都写</p>             </td>             <td class="code">               <div class="highlight"><pre>
 
 </pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

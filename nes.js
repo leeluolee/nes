@@ -94,6 +94,7 @@ function(win, doc) {
   sp.trim = sp.trim || function() {
     return this.replace(trimReg, "")
   }
+  
   //es5 bind
   fp.bind = fp.bind || function(context, args) {
     args = slice.call(arguments, 1);
@@ -103,8 +104,7 @@ function(win, doc) {
     }
   }
   //es5 Array indexOf
-  ap.indexOf = ap.indexOf ||
-  function(a) {
+  ap.indexOf = ap.indexOf || function(a) {
     for (var i = 0, len = this.length; i < len; i++) {
       if (a === this[i]) return i
     }

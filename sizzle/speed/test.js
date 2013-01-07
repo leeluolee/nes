@@ -82,6 +82,7 @@ var start = function(){
     log[method]("'   "+sl+"   '开始尝试,有"+result.length,
         "原生qsa:"+qsa)
   }
+  console.log(Q("div.example[class] p:nth-child(2n),p.content ~ span", document))
 
 }
 

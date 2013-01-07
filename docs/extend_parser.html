@@ -6,13 +6,14 @@
 <p><strong>为什么不直接添加新规则到nes.parser中?</strong>
 因为例如(li.class)*2 的group或者 repeat都是
 nes中不需要的 拖缓了速度 还增加了冲突的可能(冲突可通过order来规避，
-但是负责的parse还是不建议这样来实现，应该通过手写或者bison这种成熟解析生成)</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="kd">var</span> <span class="nx">parser2</span> <span class="o">=</span> <span class="nx">nes</span><span class="p">.</span><span class="nx">parser</span><span class="p">.</span><span class="nx">clone</span><span class="p">()</span>
+这个parser可以用来生成 命令行参数解析等简单任务
+但是复杂的parse还是不建议这样来实现，应该通过手写或者bison这种成熟解析生成)</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="kd">var</span> <span class="nx">parser2</span> <span class="o">=</span> <span class="nx">nes</span><span class="p">.</span><span class="nx">parser</span><span class="p">.</span><span class="nx">clone</span><span class="p">()</span>
 </pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>其中pesudos,分隔符也是不需要</p>             </td>             <td class="code">               <div class="highlight"><pre>
     <span class="p">.</span><span class="nx">off</span><span class="p">([</span><span class="s2">&quot;pesudos&quot;</span><span class="p">,</span><span class="s2">&quot;split&quot;</span><span class="p">])</span>
 </pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>添加zen-coding中需要的匹配</p>             </td>             <td class="code">               <div class="highlight"><pre>
     <span class="p">.</span><span class="nx">on</span><span class="p">({</span>
       <span class="s2">&quot;group&quot;</span><span class="o">:</span> <span class="p">{</span>
-        <span class="nx">reg</span><span class="o">:</span><span class="sr">/\((.*)\)/</span><span class="p">,</span>
+        <span class="nx">reg</span><span class="o">:</span><span class="sr">/\(([^\)]*)\)/</span><span class="p">,</span>
         <span class="nx">action</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">all</span><span class="p">,</span> <span class="nx">capture</span><span class="p">){</span>
           <span class="k">this</span><span class="p">.</span><span class="nx">current</span><span class="p">().</span><span class="nx">group</span> <span class="o">=</span> <span class="nx">capture</span>
         <span class="p">},</span>
@@ -90,6 +91,7 @@ nes中不需要的 拖缓了速度 还增加了冲突的可能(冲突可通过or
 如果顶层节点不是一个，则返回一个documentFragment
 如果是group 则进行二次create (group中有group以此类推)</p>             </td>             <td class="code">               <div class="highlight"><pre>
   <span class="kd">var</span> <span class="nx">create</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">sl</span><span class="p">){</span>
+    <span class="nx">sl</span> <span class="o">=</span> <span class="nx">sl</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">parser2</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">sl</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
       <span class="nx">len</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span>
       <span class="nx">datum</span><span class="p">,</span> <span class="nx">parent</span><span class="p">,</span> <span class="nx">current</span><span class="p">,</span> <span class="nx">prev</span>
@@ -98,16 +100,20 @@ nes中不需要的 拖缓了速度 还增加了冲突的可能(冲突可通过or
       <span class="nx">prev</span> <span class="o">=</span> <span class="nx">current</span>
       <span class="nx">current</span> <span class="o">=</span> <span class="nx">createNode</span><span class="p">(</span><span class="nx">datum</span><span class="p">)</span>
       <span class="k">if</span><span class="p">(</span><span class="nx">i</span><span class="o">!==</span><span class="mi">0</span><span class="p">){</span>
-        <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">comboFilter</span><span class="p">(</span><span class="nx">prev</span><span class="p">,</span> <span class="nx">current</span><span class="p">,</span> <span class="nx">data</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">combo</span><span class="p">)</span>
-        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">parent</span><span class="p">)</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">node</span>
+        <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">comboFilter</span><span class="p">(</span><span class="nx">prev</span><span class="p">,</span> <span class="nx">current</span><span class="p">,</span> <span class="nx">data</span><span class="p">[</span><span class="nx">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nx">combo</span><span class="p">)</span> <span class="c1">//匹配出真正的parent节点</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">parent</span> <span class="o">===</span> <span class="nx">prev</span><span class="p">)</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">node</span>
       <span class="p">}</span>
+      <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">parent</span><span class="p">)</span> <span class="nx">parent</span> <span class="o">=</span> <span class="nx">current</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="nx">parent</span>
   <span class="p">}</span>
-  <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">create</span><span class="p">(</span><span class="s2">&quot;p#id.m-hd.m-bd&gt;(li#name[tlt=ha].nm1+li.nm2)*2&quot;</span><span class="p">)</span>
-  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;-----------------zen-coding输出--------------&quot;</span><span class="p">)</span>
+  <span class="kd">var</span> <span class="nx">node</span> <span class="o">=</span> <span class="nx">create</span><span class="p">(</span><span class="s2">&quot;p&gt;div#cnt+header#id.m-hd.m-md&gt;ul&gt;(li#nm[rel=hah].name1+li.nm2*5)*10&quot;</span><span class="p">)</span>
+  <span class="k">if</span><span class="p">(</span><span class="nx">console</span><span class="o">&amp;&amp;</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">){</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;-----------------zen-coding输出--------------&quot;</span><span class="p">)</span>
 </pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>这里检查节点，如果信息不全，可以将这个节点</p>             </td>             <td class="code">               <div class="highlight"><pre>
-  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span>
-  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;-----------------zen-coding输出结束--------------&quot;</span><span class="p">)</span>
+    <span class="nx">nes</span><span class="p">.</span><span class="nx">one</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">).</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">node</span><span class="p">)</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;-----------------zen-coding输出结束--------------&quot;</span><span class="p">)</span>
+  <span class="p">}</span>
 
 </pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
