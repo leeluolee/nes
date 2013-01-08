@@ -8,10 +8,6 @@ nes.pesudos({
   "include":function(node, param){
     return !!nes.one( param, node)
   },
-  //找出有具体text内容的节点
-  "contains":function(node, param){
-    return ~(node.innerText || node.textContent || '').indexOf(param) 
-  },
   //有比较多的选择器实现了这个表单类的伪类，确实比较有用
   "radio": function(node){
     return node.type === "radio"
@@ -24,6 +20,7 @@ nes.pesudos({
       sl = tmp[1],
       start = node.parentNode.firstChild
 
+      console.log(sl)
     do{
       if(start.nodeType === 1&& nes.matches(start , sl)) nth--
     }while(nth&&(start = start.nextSibling))

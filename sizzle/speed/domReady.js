@@ -41,14 +41,16 @@ define(function () {
      * Sets the page as loaded.
      */
     function pageLoaded() {
-        if (!isPageLoaded) {
-            isPageLoaded = true;
-            if (scrollIntervalId) {
-                clearInterval(scrollIntervalId);
-            }
+        setTimeout(function(){
+            if (!isPageLoaded) {
+                isPageLoaded = true;
+                if (scrollIntervalId) {
+                    clearInterval(scrollIntervalId);
+                }
 
-            callReady();
-        }
+                callReady();
+            }
+        },1000)
     }
 
     if (isBrowser) {

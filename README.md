@@ -148,13 +148,12 @@ nes.pesudos("include", function(node, param){
 -----------------------------------------------------------
 
 <a name="combos"></a>
-###属性操作符扩展 —— nes.combos(String name, Function matcher)
+###属性操作符扩展 —— nes.operators(String name, Function matcher)
 
 * name - 伪类名(类似selected、nth-child等)
-* matcher(Element node, String key, String value) - 返回boolean值判断这个节点是否满足要求, 参数有:
-  + node - ,当前匹配到的节点
-  + key - 代表匹配到的属性键, 如[title=haha] 的title
+* matcher(String value, String nodeValue) - 返回boolean值判断这个节点是否满足要求, 参数有:
   + value = 代表匹配到的属性值, 如[title=haha] 的haha
+  + nodeValue - 匹配到的节点真实属性值
 
 __场景描述__
 

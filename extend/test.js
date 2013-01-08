@@ -5,7 +5,7 @@ var sls = [
 "div[class!=made_up]",
 "div:matches(.class1,.class,body .example)",
 "div:not([href], body > div.example)",
-"h1[id]:contains(Selectors)",
+// "h1[id]:contains(Selectors)",
 "div:target",
 "div:matches(:first-child,:last-child)",
 "li:nth-match( 3 of li.trigger)",
@@ -60,7 +60,7 @@ var process= function(sl,container){
 }
 // 把这里的document改成document.getElementById("testContainer")
 var container = document //然后蛋疼了、
-
+var a = nes.parse("div & d")
 
 
 window.onload=test

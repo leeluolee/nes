@@ -47,7 +47,10 @@ function(win, doc) {
           if (typeof key === "undefined") return cache
           return cache[key]
         },
-        length: max
+        length: max,
+        len:function(){
+          return keys.length
+        }
       }
     },
     // 让setter型函数fn支持object型的参数 
@@ -307,9 +310,7 @@ function(win, doc) {
           retain = extractRefNum(rule.regexp) + 1 // 1就是那个all
         if(rule.filter && !filters[i]){ 
           filters[i] = rule.filter
-          console.log(i)
           } //将filter转移到filters下
-
         links[i] = [curIndex, retain] //分别是rule名，参数数量
         var regexp = extractRefIndex(rule.regexp, curIndex - 1);
         curIndex += retain;
@@ -407,8 +408,7 @@ function(win, doc) {
       // 属性操作符 如= 、!=
       combo: "[>\\s+~](?!=)",
       // 连接符 如 > ~ 
-      // 中文unicode范围http://baike.baidu.com/view/40801.htm#sub40801_3
-      word: "[\\\\\\w\\u4e00-\\u9fbf-]"
+      word: "[\\\\\\w\\u00A1-\\uFFFF-]"
     },
     // 语法规则定义
     rules = {
@@ -456,8 +456,9 @@ function(win, doc) {
         // 关闭最外圈括号
         action: function(all, name, param) {
           var current = this.current(),
-            pesudos = current.pesudos || (current.pesudos = [])
-            name = name.toLowerCase()
+            pesudos = current.pesudos || (current.pesudos = []),
+            name = name.toLowerCase(),
+            res = { name: name}
 
             if (param) param = param.trim()
             if (posPesudoReg.test(name)) {
@@ -465,10 +466,8 @@ function(win, doc) {
               // 这里我们会把nth-child(an+b) 的 a 与 b 在不同输入下标准化
               param = extractNthValue(param)
             }
-          pesudos.push({
-            name: name,
-            param: param
-          })
+          if(param) res.param = param
+          pesudos.push(res)
         }
       },
       // 属性选择符  如  [class=hahaha]
@@ -480,6 +479,7 @@ function(win, doc) {
         action: function(all, key, operator, value) {
           var current = this.current(),
             attributes = current.attributes || (current.attributes = [])
+          var res = {}
             attributes.push({
               key: key,
               operator: operator,
@@ -1165,7 +1165,7 @@ function(win, doc) {
         // 也支持字面量的参数输入
         return autoSet(function(key, value) {
           // Warning: 直接覆盖，如果存在的话
-          container[key] = value.bind(container);
+          container[key] = value;
           if (i in beforeAssign) {
             beforeAssign[i](key, value);
           }
@@ -1176,13 +1176,13 @@ function(win, doc) {
   // 关键字都写入了正则式中，这种情况下需要将新的正则式
   // 填入相关正则，并进行parser的setup
   })(expandFilters, {
-    "operators": function(key, value) {
+    "operators": function(key) {
       var befores = macros.operator.split("]");
       befores.splice(1, 0, key.charAt(0) + "]");
       macros.operator = befores.join("");
       parser.setup();
     },
-    "combos": function(key, value) {
+    "combos": function(key) {
       var befores = macros.combo.split("]");
       befores.splice(1, 0, key + "]");
       macros.combo = befores.join("");
@@ -1196,6 +1196,7 @@ function(win, doc) {
   extend(nes, {
     // 直接设置其为true 来强制不适用原生querySelector Api
     debug:false,
+    _nthCache:nthCache,
     // parser , 抽离的parser部分
     // ---------------------------
     // 它可以:

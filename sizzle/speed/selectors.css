@@ -11,25 +11,17 @@ h1#title, div h1:matches(#title)
 div.example, ul .tocline2
 .tocline2, .tocline3, .tocline4
 .example p , .example a
-p:nth-child(even) a
-p:nth-child(2n) a
-p:nth-child(5n+1) a
+p:nth-child(even) a 
+p:nth-child(2n) > a
+p:nth-child(5n+1) a 
 p:nth-child(-3n+11) >a
-p:nth-child(3n-11) >a 
-p:nth-of-type(5n+1), p:nth-of-type(3n+11)
-p:nth-last-child(n-3) + p
-p:nth-child(-n+4) > a
-p:nth-child(n+1) > a
-p:nth-child(-3n+2) > a
-p:nth-child(n-3) > a
-p:nth-child(1) a
 div.example[class] ~ p.note > strong + code.css, p.note ~ h4
 body div, div p
 div > p, div + p, div ~ p
 div[class^=exa][class$=mple]
 div p a
 div.example > p > a
-div + p + a
+div + p + p
 div ~ p ~ p ,div[class$=mple]
 div, p ,div[class~=example][class][class~=example]
 ul.toc li.tocline2, div[class=example]

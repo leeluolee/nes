@@ -109,10 +109,3 @@
     return parent
   }
   var node = create("p>div#cnt+header#id.m-hd.m-md>ul>(li#nm[rel=hah].name1+li.nm2*5)*10")
-  if(console&&console.log){
-    console.log("-----------------zen-coding输出--------------")
-    // 这里检查节点，如果信息不全，可以将这个节点
-    nes.one("body").appendChild(node)
-    console.log(node)
-    console.log("-----------------zen-coding输出结束--------------")
-  }
