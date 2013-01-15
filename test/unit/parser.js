@@ -63,7 +63,6 @@ test("attribute",function(){
   pe("[title=/test/index.html]",[[{"tag":"*","attributes":[{"key":"title","operator":"=","value":"/test/index.html"}]}]] ,"value with abs url ")
   pe("[title=#id]",[[{"tag":"*","attributes":[{"key":"title","operator":"=","value":"#id"}]}]] ,"value with anchor")
   pe("[title=http://localhost/test/index.html#id]",[[{"tag":"*","attributes":[{"key":"title","operator":"=","value":"http://localhost/test/index.html#id"}]}]] ,"value width url and anchor")
-  pe("[title]",[[{"tag":"*","attributes":[{"key":"title","operator":undefined,"value":undefined}]}]]  ,"value no operator and value")
 })
 
 test("combos",function(){

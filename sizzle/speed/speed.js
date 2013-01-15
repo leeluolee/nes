@@ -71,7 +71,7 @@ function( require, Benchmark, document, selectors ) {
 			// ,"baidu" : "baidu.query(s, d)"
 			// ,"sly" : "Sly.search(s,d)" //诶不说啥了
 			// ,"zest" : "zest(s, d)"
-			,"qsa":  "d.querySelectorAll( s )"
+			// ,"qsa":  "d.querySelectorAll( s )"
 		},
 
 		// Keeps track of overall scores

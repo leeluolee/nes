@@ -1,16 +1,16 @@
+div + p + p, a > p
 div[class^=exa][class]
 p:not(.example:nth-child(even)) a:first-child
-div ~ p ~ p ~ p a[class*=xam]
+body div[class$=xam], div + p > p   p a:nth-child(3n+1)
 .title ,.toc, .toc .tocline2
-div ~ p + p ~ p a:first-child
-div ~ p ~ p + p[class]
+div ~ p + p ~ p a:first-child ,div ~ p ~ p + p[class^="exm"]
 body div p a
 div.example[class] p:nth-child(2n):not(.toc2,.toc) span
 body p:first-child a[href],body div.example
 h1#title, div h1:matches(#title)
 div.example, ul .tocline2
 .tocline2, .tocline3, .tocline4
-.example p , .example a
+.example p , a.example
 p:nth-child(even) a 
 p:nth-child(2n) > a
 p:nth-child(5n+1) a 
@@ -20,8 +20,6 @@ body div, div p
 div > p, div + p, div ~ p
 div[class^=exa][class$=mple]
 div p a
-div.example > p > a
-div + p + p
 div ~ p ~ p ,div[class$=mple]
 div, p ,div[class~=example][class][class~=example]
 ul.toc li.tocline2, div[class=example]

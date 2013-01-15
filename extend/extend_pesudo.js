@@ -20,7 +20,6 @@ nes.pesudos({
       sl = tmp[1],
       start = node.parentNode.firstChild
 
-      console.log(sl)
     do{
       if(start.nodeType === 1&& nes.matches(start , sl)) nth--
     }while(nth&&(start = start.nextSibling))

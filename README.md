@@ -147,7 +147,7 @@ nes.pesudos("include", function(node, param){
 ```
 -----------------------------------------------------------
 
-<a name="combos"></a>
+<a name="operators"></a>
 ###属性操作符扩展 —— nes.operators(String name, Function matcher)
 
 * name - 伪类名(类似selected、nth-child等)
@@ -170,7 +170,15 @@ nes.operators("!=", function(node, key, value){
   return node.getAttribute(key) !== value
 })
 ```
+
+<a name="combos"></a>
 ### 连接符扩展 —— nes.combos(String name,Function finder)
+
+* name - 伪类名(类似selected、nth-child等)
+* matcher(String value, String nodeValue) - 返回boolean值判断这个节点是否满足要求, 参数有:
+  + value = 代表匹配到的属性值, 如[title=haha] 的haha
+  + nodeValue - 匹配到的节点真实属性值
+  
 __注意:__combo的扩展与上面两个扩展都不同，因为它是连接符而不是前两个的Simple Selector，它传入的是finder函数，目的是找到你满足的节点
 
 __场景描述__: 你需要获得 `ul.test li.trigger`节点 前的所有li节点(即连接符`~`的相反版)
@@ -259,3 +267,6 @@ Q.js、Sizzle、nwmatcher等前辈...还有百度UX那篇选择器扫盲贴。
 ### changelog
 
 1. v0.05 - 2013/1/4 抽象出了parser部分 
+
+### TODO
+1. 我靠 是pseudo 不是pesudo

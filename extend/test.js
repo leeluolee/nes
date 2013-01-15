@@ -34,6 +34,9 @@ var getSelector = function(index){
 }
 var test = function(selectors){
   getSelector(0)
+  var node = create("p>div.nav+div.cnt+header#id.m-hd.m-md>ul>(li#nm[rel=hah].name1+li.nm2*5)*10")
+  document.body.appendChild(node)
+  console.log(node)
 }
 var process= function(sl,container){
     var result ,qsa,sizzle,nw
@@ -57,6 +60,7 @@ var process= function(sl,container){
     log[method]("开始尝试'   "+sl+"   ', nes: "+result,
         "<===>原生qsa:"+qsa,"<<=====>>NWM:"+nw)
 
+
 }
 // 把这里的document改成document.getElementById("testContainer")
 var container = document //然后蛋疼了、
@@ -64,6 +68,7 @@ var a = nes.parse("div & d")
 
 
 window.onload=test
+
 
 
 

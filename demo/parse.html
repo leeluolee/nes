@@ -5,14 +5,21 @@
   <title>Document</title>
   <style>
     body{font-family: "Arial Black",微软雅黑;color:#666;}
-    h1{font-size: 28px;font-weight: bold;color:#012840;}
+    h1{font-size: 28px;font-weight: bold;color:#012840;text-align: center;}
     #data{font-size: 26px;padding-left: 50px;}
     ul{margin: 0px;}
     ul li{padding-left: 10px;list-style: none;color:#333; white-space: nowrap;}
-    #info {height: 40px;font-size: 30px;font-weight: bold;text-align:center;border-radius: 5px dotted #333;color:#3a3;}
+    #info ,#trunk{height: 40px;font-size: 30px;font-weight: bold;text-align:center;border-radius: 5px dotted #333;color:#3a3;}
+    #trunk {color: #a33;font-size: 24px;height: 120px;width: 80%;margin: 0 auto;}
   </style>
 </head>
 <body>
+  <h1>TRUNK</h1>
+<div id="trunk">
+  /(\s*,\s*)|(#([\w\u4e00-\u9fbf-]+))|(\*|\w+)|(\.([\w\u4e00-\u9fbf-]+))|
+    (:([\w\u4e00-\u9fbf-]+)(?:\(([^\(\)]*|(?:\([^\)]+\)|[^\(\)]*)+)\))?)|
+    (\[([\w\u4e00-\u9fbf-]+)(?:([*^$|~!]?=)['"]?((?:[\w\u4e00-\u9fbf-]||\s)+)['"]?)?\])|(::([\w\u4e00-\u9fbf-]+)) |([>\s+~&%](?!=))|(\s*\{\s*(\d*),(\-?\d*)\s*\}\s*)/g
+</div>
 <div id="info"></div>
 <h1 id="rule"></h1>
 <div id="data">[[<ul id="data">

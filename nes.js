@@ -1,8 +1,8 @@
-!
-function(win, doc) {
+
+!function(win, doc, undefined) {
   // __nes命名空间__
   var nes = {version: "0.0.5"},
-    locals = {} //存放local属性...被global坑死了
+    locals = {}; //存放local属性...被global坑死了
 
 
   // 常用属性local化
@@ -17,86 +17,86 @@ function(win, doc) {
     // =================================
     // 将类数组(如Nodelist、Argument)变为数组
     toArray = function(arr) {
-      return slice.call(arr)
+      return slice.call(arr);
     },
-    // 够用的短小类型判断 
+    // 够用的短小类型判断
     typeOf = function(o) {
-      return o == null ? String(o) : op.toString.call(o).slice(8, -1).toLowerCase()
+      return o == null ? String(o) : op.toString.call(o).slice(8, -1).toLowerCase();
     },
     // 够用的简单对象扩展
     extend = function(o1, o2, override) {
       for (var i in o2) {
-        if (o1[i] == null || override) o1[i] = o2[i]
+        if (o1[i] == null || override) o1[i] = o2[i];
       }
     },
     // 最简单先进先出缓存队列, max设置最大缓存长度, 为了不必要重复parse
     // nes会多次用到这个方法创建cache
     createCache = function(max) {
       var keys = [],
-        cache = {}
+        cache = {};
       return {
         set: function(key, value) {
           if (keys.length > this.length) {
-            delete cache[keys.shift()]
+            delete cache[keys.shift()];
           }
-          cache[key] = value
-          keys.push(key)
-          return value
+          cache[key] = value;
+          keys.push(key);
+          return value;
         },
         get: function(key) {
-          if (typeof key === "undefined") return cache
-          return cache[key]
+          if (key === undefined) return cache;
+          return cache[key];
         },
         length: max,
         len:function(){
-          return keys.length
+          return keys.length;
         }
-      }
+      };
     },
-    // 让setter型函数fn支持object型的参数 
-    // 即支持`set(name:value)` 
+    // 让setter型函数fn支持object型的参数
+    // 即支持`set(name:value)`
     // 也支持`set({name1:value1,name2:value2})`
     autoSet = function(fn) {
       return function(key, value) {
         if (typeOf(key) == "object") {
           for (var i in key) {
-            fn.call(this, i, key[i])
+            fn.call(this, i, key[i]);
           }
         } else {
-          fn.call(this, key, value)
+          fn.call(this, key, value);
         }
         return this;
-      }
+      };
     },
     assert = function(fn) {
       try {
-        return fn()
+        return fn();
       } catch (e) {
-        return false
+        return false;
       } finally {
         testNode = document.createElement("div");
       }
-    }
+    };
     // Fixed: toArray 低于IE8的 Nodelist无法使用slice获得array
   try {
-    slice.call(doc.getElementsByTagName("body"))
+    slice.call(doc.getElementsByTagName("body"));
   } catch (e) {
     toArray = function(arr) {
       var result = [],
-        len = arr.length
+        len = arr.length;
       for (var i = 0; i < len; i++) {
-        result.push(arr[i])
+        result.push(arr[i]);
       }
-      return result
-    }
+      return result;
+    };
   }
 
   // 扩展ES5 Native支持的函数，坑爹的远古浏览器
   //es5 trim
-  var trimReg = /^\s+|\s+$/g
+  var trimReg = /^\s+|\s+$/g;
   sp.trim = sp.trim || function() {
-    return this.replace(trimReg, "")
-  }
+    return this.replace(trimReg, "");
+  };
   
   //es5 bind
   fp.bind = fp.bind || function(context, args) {
@@ -104,40 +104,41 @@ function(win, doc) {
     var fn = this;
     return function() {
       fn.apply(context, args.concat(slice.call(arguments)));
-    }
-  }
+    };
+  };
   //es5 Array indexOf
   ap.indexOf = ap.indexOf || function(a) {
     for (var i = 0, len = this.length; i < len; i++) {
-      if (a === this[i]) return i
+      if (a === this[i]) return i;
     }
-    return -1
-  }
+    return -1;
+  };
 
   // Parser 相关
   var
   //抽离出字匹配数目
     ignoredRef = /\(\?\!|\(\?\:/,
     extractRefNum = function(regStr) {
-      var left = right = 0,
+      var left = 0,
+        right = 0,
         len = regStr.length,
-        ignored = regStr.split(ignoredRef).length - 1 //忽略非捕获匹配
+        ignored = regStr.split(ignoredRef).length - 1; //忽略非捕获匹配
       for (; len--;) {
-        var letter = regStr.charAt(len)
-        if (len == 0 || regStr.charAt(len - 1) !== "\\") { //不包括转义括号
-          if (letter === "(") left++
-          if (letter === ")") right++
+        var letter = regStr.charAt(len);
+        if (len === 0 || regStr.charAt(len - 1) !== "\\"){//不包括转义括号
+          if (letter === "(") left++;
+          if (letter === ")") right++;
         }
       }
-      if (left !== right) throw regStr + "中的括号不匹配"
-      else return left - ignored
+      if (left !== right) throw regStr + "中的括号不匹配";
+      else return left - ignored;
     },
     //前向引用 如\1 \12 等在TRUNK合并时要做处理
     refIndexReg = /\\(\d+)/g,
     extractRefIndex = function(regStr, curIndex) {
       return regStr.replace(refIndexReg, function(a, b) {
-        return "\\" + (parseInt(b) + curIndex)
-      })
+        return "\\" + (parseInt(b,10) + curIndex);
+      });
     },
     // // 生成默认的action，这个会将匹配到的参数推入一个同名的数组内
     // createAction = function(name) {
@@ -153,20 +154,20 @@ function(win, doc) {
       for (var prop in obj) {
         if (obj.hasOwnProperty(prop)) result.push(prop);
       }
-      return result
+      return result;
     },
     // 将规则中的reg中的macro替换掉
     cleanRule = function(rule) {
-      var reg = rule.reg
+      var reg = rule.reg;
       //如果已经是regexp了就转为string
-      if (typeOf(reg) === "regexp") reg = reg.toString().slice(1, -1)
+      if (typeOf(reg) === "regexp") reg = reg.toString().slice(1, -1);
       //将macro替换
       rule.regexp = reg.replace(replaceReg, function(a, b) {
-        if (b in macros) return macros[b]
-        else throw new Error('can"t replace undefined macros:' + b)
-      })
-      return rule
-    }, 
+        if (b in macros) return macros[b];
+        else throw new Error('can"t replace undefined macros:' + b);
+      });
+      return rule;
+    },
     cleanRules = function(rules) {
       for (var i in rules) {
         if (rules.hasOwnProperty(i)) cleanRule(rules[i])
@@ -1060,18 +1061,23 @@ function(win, doc) {
     //     datum: {tag:"*"....etc}
   function find(datas, context) {
       if (!datas[0][0]) return []
-      var results = []
+      var results = [],
+      // 标志是否需要sort(sort的开销略大)
+        notNullResult = 0
+
       for (var i = 0, len = datas.length; i < len; i++) {
         var data = datas[i],
           dlen = data.length,
-          last = data[dlen - 1]
-          results = results.concat(getTargets(data, context))
+          last = data[dlen - 1],
+          result = getTargets(data, context)
+          if(result&&result.length) notNullResult++
+          results = results.concat(result)
       }
       clearNthPositionCache()
       if (!results.length) return results
-      if (len > 1){
-        distinct(results)
+      if (notNullResult > 1){
         results.sort(sortor)
+        distinct(results)
       }
       return results
     }
@@ -1193,37 +1199,36 @@ function(win, doc) {
   // 2. 暴露API
   // -------------------------------------
   //
-  extend(nes, {
-    // 直接设置其为true 来强制不适用原生querySelector Api
-    debug:false,
-    _nthCache:nthCache,
-    // parser , 抽离的parser部分
-    // ---------------------------
-    // 它可以:
-    //    1. parser.parse 解析内部规则定义的字符串匹配
-    //    2. parser.on    添加新规则
-    //    3. parser.clone 复制此parser，这个作用会在后面的zen-coding的demo中体现
-    //    4. parser.off   删除规则
-    //    5. parser.cache 缓存控制
-    parser:parser,
+  // 直接设置其为true 来强制不适用原生querySelector Api
+  nes.debug=false,
+  nes._nthCache = nthCache,
+  // parser , 抽离的parser部分
+  // ---------------------------
+  // 它可以:
+  //
+  //    1. parser.parse 解析内部规则定义的字符串匹配
+  //    2. parser.on    添加新规则
+  //    3. parser.clone 复制此parser，这个作用会在后面的zen-coding的demo中体现
+  //    4. parser.off   删除规则
+  //    5. parser.cache 缓存控制
+  nes.parser = parser,
 
-    //解析, 这个将被移除，使用parser.parse来代替
-    parse: parse,
-    //查找parser解析后的data代表的节点 __private__
-    _find: find,  
-    //测试时排除原生querySelector的影响 __deprecated__! 使用nes.debug来控制
-    _get: get,
-    //        *主要API*
-    // -------------------------
-    one: one,
-    all: all,
-    matches: matches
-    // 内建扩展 api 这三个已经内建:
-    // 
-    // 1. `pesudos`
-    // 2. `operators`
-    // 3. `combos`
-  })
+  //解析, 这个将被移除，使用parser.parse来代替
+  nes.parse = parse,
+  //查找parser解析后的data代表的节点 __private__
+  nes._find = find,  
+  //测试时排除原生querySelector的影响 __deprecated__! 使用nes.debug来控制
+  nes._get = get,
+  //        *主要API*
+  // -------------------------
+  nes.one = one,
+  nes.all = all,
+  nes.matches = matches
+  // 内建扩展 api 这三个已经内建:
+  // 
+  // 1. `pesudos`
+  // 2. `operators`
+  // 3. `combos`
 
   //          5.Exports
   // ----------------------------------------------------------------------
@@ -1238,4 +1243,4 @@ function(win, doc) {
     // 直接暴露到全局
     win.nes = nes;
   }
-}(window, document)
+}(window, document,undefined)
