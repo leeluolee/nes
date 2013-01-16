@@ -2,5 +2,5 @@
 selector.md
 *.sublime*
 extend/private
-demo*
+demo/*
 *test2*
