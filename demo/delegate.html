@@ -3,7 +3,10 @@
 <head>
     <title>网易摄影</title>
     <meta charset="utf-8"/>
+    <style>
+    </style>
 </head>
+
 <body>
 
 
@@ -60,7 +63,6 @@
 <!-- @DEFINE -->
 <!-- <script src="http://nej.netease.com/nej/src/define.js?pro=./"></script> -->
 <script>
-
 var str2obj = function(str){
     var reg = /^\s*([^:]*)\s*:\s*([^:;]*);/g,tmp = {}
     while(str = str.replace(reg, function(all, left, right){
@@ -71,17 +73,9 @@ var str2obj = function(str){
     return tmp
 }
 
+
 console.log(str2obj("left:82.5px;top:69.5px;cursor:w-resize;"))
 
-// var f = function(){
-//   var _v = NEJ.P("nej.v"),
-//     container = nes.one(".m-list")
-
-//   _v._$delegateEvent(container, "click -> a.btn",function(e){
-//     alert(e.target.innerHTML)
-//   })
-// }
-// define("demo.js", ["{pro}/delegate.js","{lib}ui/base.js","{pro}../nes.js"], f)
 </script>
 </body>
 </html>

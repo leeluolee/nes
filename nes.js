@@ -1117,7 +1117,7 @@
       var nodeList
       if (supportQuerySelector && !nes.debug) {
         try {
-          nodeList = (context || doc).querySelectorAll(sl);
+          nodeList = toArray((context || doc).querySelectorAll(sl));
         } catch (e) {
           nodeList = get(sl, context);
         }
