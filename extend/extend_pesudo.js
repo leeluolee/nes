@@ -12,20 +12,17 @@ nes.pesudos({
   "radio": function(node){
     return node.type === "radio"
   },
-  // 很简单的去实现一个nth-match  nth-lastmatch也是一样
-  "nth-match":function(node,param){
-    var 
-      tmp = param.split(/\s+of\s+/),
-      nth = parseInt(tmp[0]),
-      sl = tmp[1],
-      start = node.parentNode.firstChild
-
-    do{
-      if(start.nodeType === 1&& nes.matches(start , sl)) nth--
-    }while(nth&&(start = start.nextSibling))
-
-    return !nth&&node === start 
+  "local-link": function(all, param){
+     if(!param) param = 0;   
+     else param = parseInt(param);
   }
   //其他形如:text 、:checkbox 等等都是类似的
 })
+
+
+function getHref(node) {
+  return "href" in node ? node.getAttribute("href", 2) : node.getAttribute("href")
+}
+
+
 

@@ -1,5 +1,34 @@
+a[rel]
+div[class]
+div[class=example]
+div[class^=exa]
+div[class$=mple]
+div[class*=e]
+div[class|=dialog]
+div[class!=made_up]
+div[class~=example]
+p:nth-child(even)
+p:nth-child(2n)
+p:nth-child(odd)
+p:nth-child(5n+1)
+p:nth-child(3n-11)
+p:nth-child(n)
+body
+div
+body div
+.note
+#title
+h1#title
+div #title
+div.example
+ul .tocline2
+.title
+.toc
+.toc .tocline2
+.tocline2, .tocline3, .tocline4
+div.example, div.note
+div[class~=example][class][class~=example]
 div + p + p, a > p
-div[class^=exa][class]
 p:not(.example:nth-child(even)) a:first-child
 body div[class$=xam], div + p > p   p a:nth-child(3n+1)
 .title ,.toc, .toc .tocline2
@@ -13,7 +42,7 @@ div.example, ul .tocline2
 .example p , a.example
 p:nth-child(even) a 
 p:nth-child(2n) > a
-p:nth-child(5n+1) a 
+p:nth-child(-4n+1) a 
 p:nth-child(-3n+11) >a
 div.example[class] ~ p.note > strong + code.css, p.note ~ h4
 body div, div p
@@ -21,7 +50,6 @@ div > p, div + p, div ~ p
 div[class^=exa][class$=mple]
 div p a
 div ~ p ~ p ,div[class$=mple]
-div, p ,div[class~=example][class][class~=example]
 ul.toc li.tocline2, div[class=example]
 ul.toc > li.tocline2, div[class]
 a[href][lang][class]

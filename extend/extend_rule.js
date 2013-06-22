@@ -32,17 +32,17 @@ nes.parser.on("range",{
     }
   }
 })
-// 你也可以不写action.什么意思呢，就是我们可以很方边的去添加我们想要的选择器，
-// 以后可能可以实现
-nes.parser.on("pesudoElement",{
-  reg: /::(\w+)/,
-  action:function(all, name){
-    this.current().pesudoElement = name
+
+nes.parser.on("bind",{
+  reg: /\{(['"]?)(\w+)\1\}/,
+  action:function(all, bind){
+    this.current().bind = bind;
   },
-  filter:function(node, args){
-    // 我们随机返回是否通过
-    return Math.random()>0.5
+  filter:function(node, bind){
+    var bindStr = node.getAttribute("data-bind");
+    return bindStr && bindStr.trim().split(/[\r\n\s]*,[\r\n\s]*/).some(function(str){
+      return ~str.trim().indexOf(bind)
+    })
   }
 })
-//你也两个都写
 

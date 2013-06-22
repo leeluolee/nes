@@ -10,18 +10,16 @@
 
 nes.combos({
   // 相当于 ~ 的相反版   
-  "&":function(node,match){
-    while(node = node.nextSibling){
-      if(node.nodeType ===1 && match(node)){
-        return node
-      }
+  "&":function(node, match){
+    while(node = node.nextSibling) if(node.nodeType === 1 && match(node)){
+        return node;
     }
     return null
   },
 // 与 + 相反
-  "%":function(node,match){
-    while(node = node.nextSibling){
-      if(node.nodeType ===1) return match(node)? node :null
+  "%":function(node, match){
+    while(node = node.nextSibling) if(node.nodeType === 1){
+      return match(node)? node : null;
     }
   }
 })

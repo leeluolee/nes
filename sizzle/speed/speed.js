@@ -64,6 +64,7 @@ function( require, Benchmark, document, selectors ) {
 		engines = {
 			"../../../nes":  "nes._get(s,d)"
 			,"sizzle":         "Sizzle( s, d )"
+			// ,"../../sizzle2":         "Sizzle2( s, d )"
 			// ,"nwmatcher":      "NW.Dom.select( s, d )"
 			// ,"Q" : "Q(s,d)",
 			// "qwery" : "qwery(s, d)",  //很小巧的库

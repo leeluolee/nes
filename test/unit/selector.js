@@ -371,10 +371,54 @@ test("pseudo - child", function() {
 	t( "Nth-child", "#form select:first-of-type option:nth-child(3n+0)", ["option1c"] );
 	t( "Nth-child", "#form select:first-of-type option:nth-child(-1n+3)", ["option1a", "option1b", "option1c"] );
 	t( "Nth-child", "#form select:first-of-type option:nth-child(-n+3)", ["option1a", "option1b", "option1c"] );
-	t( "Nth-child", "#form select:first-of-type option:nth-child(-1n + 3)", ["option1a", "option1b", "option1c"] );
+	t( "Nth-child", "#form select:first-of-type option:nth-child(-1n + 3)", ["option1a", "option1b", "option1c"] );	t( "Nth-child", "#form select:first-of-type option:nth-child(0n+3)", ["option1c"] );
+	// nth-type-of
+	t( "Nth-of-type", "#form select:nth-of-type(n)", ["select1", "select2", "select3", "select4", "select5"] );
+	t( "Nth-of-type", "#form select:nth-of-type(even)", ["select2", "select4"] );
+	t( "Nth-of-type", "#form select:nth-of-type(odd)", ["select1", "select3", "select5"] );
+	t( "Nth-of-type", "#form select:nth-of-type(2n)", ["select2", "select4"] );
+	t( "Nth-of-type", "#form select:nth-of-type(2n+1)",["select1", "select3", "select5"] );
+	t( "Nth-of-type", "#form select:nth-of-type(3n)", ["select3"] );
+	t( "Nth-of-type", "#form select:nth-of-type(3n+1)", ["select1","select4"] );
+	t( "Nth-of-type", "#form select:nth-of-type(3n-1)", ["select2", "select5"] );
+	t( "Nth-of-type", "#form select:nth-of-type(-1n+3)", ["select1", "select2", "select3"] );
+
+	t( "Nth-last-of-type", "#form select:nth-last-of-type(n)", ["select1", "select2", "select3", "select4", "select5"] );
+	t( "Nth-last-of-type", "#form select:nth-last-of-type(even)", ["select2", "select4"] );
+	t( "Nth-last-of-type", "#form select:nth-last-of-type(odd)", ["select1", "select3", "select5"] );
+	t( "Nth-last-of-type", "#form select:nth-last-of-type(2n)", ["select2", "select4"] );
+	t( "Nth-last-of-type", "#form select:nth-last-of-type(2n+1)",["select1", "select3", "select5"] );
+	t( "Nth-last-of-type", "#form select:nth-last-of-type(4n)", ["select2"] );
+	t( "Nth-last-of-type", "#form select:nth-last-of-type(4n+1)", ["select1","select5"] );
+	t( "Nth-last-of-type", "#form select:nth-last-of-type(3n-1)", ["select1","select4"] );
+	t( "Nth-last-of-type", "#form select:nth-last-of-type(-1n+3)", ["select3", "select4", "select5"] );
+
 });
 
 
+test("pesudo - :nth-match", function(){
+	// nth-match
+	t( "Nth-match", "#form select:nth-match(n of #form select[id])", ["select1", "select2", "select3", "select4", "select5"] );
+	t( "Nth-match", "#form select:nth-match(even of #form select[id])", ["select2", "select4"] );
+	t( "Nth-match", "#form select:nth-match(odd of #form select[id])", ["select1", "select3", "select5"] );
+	t( "Nth-match", "#form select:nth-match(2n of #form select[id])", ["select2", "select4"] );
+	t( "Nth-match", "#form select:nth-match(2n+1 of #form select[id])",["select1", "select3", "select5"] );
+	t( "Nth-match", "#form select:nth-match(3n of #form select[id])", ["select3"] );
+	t( "Nth-match", "#form select:nth-match(3n+1 of #form select[id])", ["select1","select4"] );
+	t( "Nth-match", "#form select:nth-match(3n-1 of #form select[id])", ["select2", "select5"] );
+	t( "Nth-match", "#form select:nth-match(-1n+3 of #form select[id])", ["select1", "select2", "select3"] );
+
+	t( "Nth-last-match", "#form select:nth-last-match(1 of #form select[id])", ["select5"] );
+	t( "Nth-last-match", "#form select:nth-last-match(n  of #form select[id])", ["select1", "select2", "select3", "select4", "select5"] );
+	t( "Nth-last-match", "#form select:nth-last-match(even  of #form select[id])", ["select2", "select4"] );
+	t( "Nth-last-match", "#form select:nth-last-match(odd  of #form select[id])", ["select1", "select3", "select5"] );
+	t( "Nth-last-match", "#form select:nth-last-match(2n  of #form select[id])", ["select2", "select4"] );
+	t( "Nth-last-match", "#form select:nth-last-match(2n+1  of #form select[id])",["select1", "select3", "select5"] );
+	t( "Nth-last-match", "#form select:nth-last-match(4n  of #form select[id])", ["select2"] );
+	t( "Nth-last-match", "#form select:nth-last-match(4n+1  of #form select[id])", ["select1","select5"] );
+	t( "Nth-last-match", "#form select:nth-last-match(3n-1  of #form select[id])", ["select1","select4"] );
+	t( "Nth-last-match", "#form select:nth-last-match(-1n+3  of #form select[id])", ["select3", "select4", "select5"] );
+})
 
 test("pseudo - :not", function() {
 
