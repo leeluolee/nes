@@ -3,9 +3,9 @@
 #nes
 nes is a javascript selector lib with incredible scalability, but still very fast
 
-这是与Sizzle 1.8.x的速度对比图，最右边是使用原生querySelector的速度,你也可以在本地进行测试(sizzle目录下的speed), 需要在根目录下开启一个静态服务器(使用[puer](https://github.com/leeluolee/puer))
+这是与Sizzle 1.8.x的速度对比图, 你也可以在本地进行测试(sizzle目录下的speed), 需要在根目录下开启一个静态服务器(使用[puer](https://github.com/leeluolee/puer))
 
-![Speed](https://raw.github.com/leeluolee/nes/master/vendor/speed.jpg)
+![Speed](https://raw.github.com/leeluolee/nes/master/vendor/speed.png)
 
 
 ## 1. API
