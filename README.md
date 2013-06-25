@@ -3,6 +3,10 @@
 #nes
 nes is a javascript selector lib with incredible scalability, but still very fast
 
+这是与Sizzle 1.8.x的速度对比图，最右边是使用原生querySelector的速度,你也可以在本地进行测试(sizzle目录下的speed), 需要在根目录下开启一个静态服务器(使用[puer](https://github.com/leeluolee/puer))
+
+![Speed](https://raw.github.com/leeluolee/nes/master/vendor/speed.jpg)
+
 
 ## 1. API
 
@@ -78,9 +82,7 @@ container.addEventListener("click", function(e){
 ```
 2. NEJ 
 ```javascript
-// 添加选择器适配模块({lib}util/query/query.js)的依赖, then
-_v._$addEvent('#home > li', 'click', fn) 
-// 具体请参考http://nej.netease.com
+// 添加选择器适配模块({lib}util/query/query.js)的依赖
 ```
 3. AMD
 ```javascript
