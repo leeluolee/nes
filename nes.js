@@ -103,7 +103,7 @@
     args = slice.call(arguments, 1);
     var fn = this;
     return function() {
-      fn.apply(context, args.concat(slice.call(arguments)));
+      return fn.apply(context, args.concat(slice.call(arguments)));
     };
   };
   //es5 Array indexOf
@@ -205,9 +205,12 @@
         [null]
       ],
         remain = this.input = input,
+        preRemain,
         TRUNK = this.TRUNK
         // 将remain进行this._process这里每匹配一个字符串都会进行一次reduce
-      while (remain != (remain = remain.replace(TRUNK, this._process.bind(this)))) {}
+      while (preRemain != (remain = remain.replace(TRUNK, this._process.bind(this)))) {
+        preRemain = remain;
+      }
       // 如果没有被解析完 证明选择器字符串有不能被解析的部分
       if (remain !== '') this.error(remain)
       // 返回数据并推入cache
@@ -279,16 +282,18 @@
     _process: function() {
       var links = this._links,
         rules = this._rules,
-        args = slice.call(arguments)
+        args = slice.call(arguments);
 
         for (var i in links) {
-          var link = links[i],
-            retain = link[1],
-            index = parseInt(link[0])
+          if(links.hasOwnProperty(i)){
+            var link = links[i],
+              retain = link[1],
+              index = parseInt(link[0]);
             if (args[index] && (rule = rules[i])) {
               rule.action.apply(this, args.slice(index, index + retain))
               return ""
             }
+          }
         }
       return ""
     },
