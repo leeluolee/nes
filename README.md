@@ -7,6 +7,10 @@ nes is a javascript selector lib with incredible scalability, but still very fas
 
 ![Speed](https://raw.github.com/leeluolee/nes/master/vendor/speed.png)
 
+## 浏览器支持
+
+1. IE6+ 
+
 
 ## 1. API
 
