@@ -79,7 +79,7 @@ container.addEventListener("click", function(e){
 
 1. 直接插入
 ```html
-<script src="async.js"></script>
+<script src="/path/to/nes.js"></script>
 <script>
   nes.one(...) //直接注册在全局
 </script>
