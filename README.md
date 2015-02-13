@@ -77,18 +77,18 @@ container.addEventListener("click", function(e){
 
 ### 加载
 
-1. 直接插入
+- 直接插入
 ```html
 <script src="/path/to/nes.js"></script>
 <script>
   nes.one(...) //直接注册在全局
 </script>
 ```
-2. NEJ 
+- NEJ 
 ```javascript
 // 添加选择器适配模块({lib}util/query/query.js)的依赖
 ```
-3. AMD
+- AMD
 ```javascript
 define(['/path/to/nes'], function(nes){
     nes.all(...) // 方便
